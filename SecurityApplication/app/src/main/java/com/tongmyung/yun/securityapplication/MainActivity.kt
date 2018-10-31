@@ -9,10 +9,14 @@ import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 /*지금 까지 입력한값 영어만 toByte()해주어서 P를 구했다
 * 한글은 2Byte인데 어떻게 8 바이트씩 나누어서 표현?
-* 영어 특수문자 는 거의 확인 다 되었음*/
+* 영어 특수문자 는 거의 확인 다 되었음*
+* 지금 EP와 IP XOR 까지 구현 완료 했음 이제 뒤에 S박스를 하는것만 남음*/
 class MainActivity : AppCompatActivity() {
     val P10_Index = arrayOf(3, 5, 2, 7, 4, 10, 1, 9, 8, 6)
     val P8_Index = arrayOf(6, 3, 7, 4, 8, 5, 10, 9)
+    val IP_Index = arrayOf(2, 6, 3, 1, 4, 8, 5, 7)
+    val EP_Index = arrayOf(7, 4, 5, 6, 5, 6, 7, 4)
+    var F_FUN = arrayOf(0, 0, 0, 0, 0, 0, 0, 0)
     var P10 = arrayOf("0","0","0","0","0","0","0","0","0","0") //P10 값 초기화
     var subkey_Binary: String? = null // Interger.toBinaryString 해주기위해 만들어줌
     var plainText: String? = null //평서문을 넣어주는곳
@@ -70,8 +74,8 @@ class MainActivity : AppCompatActivity() {
             val test = 104
             println("test : ${test.toChar()}")
             make_P()
-            make_IP()
-            println("IP = ${IP[0]} ${IP[1]} ${IP[2]} ${IP[3]} ${IP[4]} ${IP[5]} ${IP[6]} ${IP[7]}")
+//            make_IP()
+//            println("IP = ${IP[0]} ${IP[1]} ${IP[2]} ${IP[3]} ${IP[4]} ${IP[5]} ${IP[6]} ${IP[7]}")
         }
         catch (e: Exception){
             e.printStackTrace()
@@ -86,36 +90,14 @@ class MainActivity : AppCompatActivity() {
         println("subkey_Binary : $subkey_Binary")
     }
     fun K1_make(){ //K1 만드는 함수
-        K1[0] = P10!![5]
-        K1[1] = P10!![2]
-        K1[2] = P10!![6]
-        K1[3] = P10!![3]
-        K1[4] = P10!![7]
-        K1[5] = P10!![4]
-        K1[6] = P10!![9]
-        K1[7] = P10!![8]
+        for(i in K1.indices)
+            K1[i] = P10[P8_Index[i] -1]
     }
     fun K2_make(){ //K2 만드는함수
-        K2[0] = P10!![5]
-        K2[1] = P10!![2]
-        K2[2] = P10!![6]
-        K2[3] = P10!![3]
-        K2[4] = P10!![7]
-        K2[5] = P10!![4]
-        K2[6] = P10!![9]
-        K2[7] = P10!![8]
+        for(i in K2.indices)
+            K2[i] = P10[P8_Index[i] - 1]
     }
     fun P10_make(){ //P10 만드는 함수
-//        P10[0] = subkey_Binary!![2].toString()
-//        P10[1] = subkey_Binary!![4].toString()
-//        P10[2] = subkey_Binary!![1].toString()
-//        P10[3] = subkey_Binary!![6].toString()
-//        P10[4] = subkey_Binary!![3].toString()
-//        P10[5] = subkey_Binary!![9].toString()
-//        P10[6] = subkey_Binary!![0].toString()
-//        P10[7] = subkey_Binary!![8].toString()
-//        P10[8] = subkey_Binary!![7].toString()
-//        P10[9] = subkey_Binary!![5].toString()
         for(i in P10.indices)
             P10[i] = subkey_Binary!![P10_Index[i] - 1].toString()
     }
@@ -131,7 +113,7 @@ class MainActivity : AppCompatActivity() {
         }
         P10[9] = temp
     }
-    fun input_security_key(){
+    fun input_security_key(){ //textView 안에 넣어주는 함수
         var P10_list = ArrayList<String>()
         var K1_list = ArrayList<String>()
         var K2_list = ArrayList<String>()
@@ -147,7 +129,7 @@ class MainActivity : AppCompatActivity() {
         textView_K1.text = K1_list.toString()
         textView_K2.text = K2_list.toString()
     }
-    fun make_P(){
+    fun make_P(){ //이 함수 안에 EP 만드는것 있고 IP 만드는것 있음
         for(i in plainText?.indices!!){
             var P_integer = plainText!![i].toByte()
             var P_temp = Integer.toBinaryString(P_integer.toInt())
@@ -155,18 +137,16 @@ class MainActivity : AppCompatActivity() {
             plainText_Binary = String.format("%08d",P_temp_To_Int)
             println("plainText_Binary : $plainText_Binary")
             make_IP()
+            println("IP index $i = ${IP[0]} ${IP[1]} ${IP[2]} ${IP[3]} ${IP[4]} ${IP[5]} ${IP[6]} ${IP[7]}")
             E_P_make()
+            println("EP index $i = ${E_P[0]} ${E_P[1]} ${E_P[2]} ${E_P[3]} ${E_P[4]} ${E_P[5]} ${E_P[6]} ${E_P[7]}")
+            exclusiveOR_EP()
+            println("F_Fun $i = ${F_FUN[0]} ${F_FUN[1]} ${F_FUN[2]} ${F_FUN[3]} ${F_FUN[4]} ${F_FUN[5]} ${F_FUN[6]} ${F_FUN[7]}")
         }
     }
-    fun make_IP(){
-        IP[0] = plainText_Binary!![1].toString()
-        IP[1] = plainText_Binary!![5].toString()
-        IP[2] = plainText_Binary!![2].toString()
-        IP[3] = plainText_Binary!![0].toString()
-        IP[4] = plainText_Binary!![3].toString()
-        IP[5] = plainText_Binary!![7].toString()
-        IP[6] = plainText_Binary!![4].toString()
-        IP[7] = plainText_Binary!![6].toString()
+    fun make_IP(){ //IP 만드는 함수
+        for(i in IP.indices)
+            IP[i] = plainText_Binary!![IP_Index[i] - 1].toString()
     }
     fun subkey_check(){
         var range = input_subkey.text
@@ -204,16 +184,15 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(this,"초기화가 완료 되었습니다",Toast.LENGTH_SHORT).show()
     }
     fun E_P_make(){
-        E_P[0] = IP[6]
-        E_P[1] = IP[3]
-        E_P[2] = IP[4]
-        E_P[3] = IP[5]
-        E_P[4] = IP[4]
-        E_P[5] = IP[5]
-        E_P[6] = IP[6]
-        E_P[7] = IP[3]
+        for(i in E_P.indices)
+            E_P[i] = IP[EP_Index[i]]
     }
-    fun exclusiveOR(){
-
+    fun exclusiveOR_EP(){ //함수 F()에서 EP와 K1 XOR 하는 함수
+        for(i in E_P.indices){
+            if(E_P[i] == K1[i])
+                F_FUN[i] = 0
+            else
+                F_FUN[i] = 1
+        }
     }
 }
