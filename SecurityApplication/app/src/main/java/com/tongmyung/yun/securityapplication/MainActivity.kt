@@ -10,15 +10,18 @@ import kotlinx.android.synthetic.main.activity_main.*
 /*지금 까지 입력한값 영어만 toByte()해주어서 P를 구했다
 * 한글은 2Byte인데 어떻게 8 바이트씩 나누어서 표현?
 * 영어 특수문자 는 거의 확인 다 되었음*
-* 지금 EP와 IP XOR 까지 구현 완료 했음 이제 뒤에 S박스를 하는것만 남음*/
+* 지금 EP와 IP XOR 까지 구현 완료 했음 이제 뒤에 S박스를 하는것만 남음
+* 2018-11-01 S박스 구현 완료*/
 class MainActivity : AppCompatActivity() {
     val P10_Index = arrayOf(3, 5, 2, 7, 4, 10, 1, 9, 8, 6)
     val P8_Index = arrayOf(6, 3, 7, 4, 8, 5, 10, 9)
     val IP_Index = arrayOf(2, 6, 3, 1, 4, 8, 5, 7)
     val EP_Index = arrayOf(7, 4, 5, 6, 5, 6, 7, 4)
     var F_FUN = arrayOf(0, 0, 0, 0, 0, 0, 0, 0)
-    val S_Box0_column = arrayOf(1,4) //S_BOX 가로  상단 인덱스
-    val S_Box0_row = arrayOf(2,3) //S_BOX 세로 좌측 인덱스
+    val S_Box0_column = arrayOf(1,4) //S_BOX0 가로  상단 인덱스
+    val S_Box0_row = arrayOf(2,3) //S_BOX0 세로 좌측 인덱스
+    val S_Box1_column = arrayOf(5,8) //S_Box1 가로 상단 인덱스
+    val S_Box1_row = arrayOf(6,7) //S_Box 1 세로 좌측 인덱스
     var P10 = arrayOf("0","0","0","0","0","0","0","0","0","0") //P10 값 초기화
     var subkey_Binary: String? = null // Interger.toBinaryString 해주기위해 만들어줌
     var plainText: String? = null //평서문을 넣어주는곳
@@ -36,8 +39,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         hashMap = HashMapadd()
-        hashMap?.S1_map_add()
         hashMap?.S0_map_add()
+        hashMap?.S1_map_add()
 
 
         for(i in 0..3)
@@ -202,18 +205,31 @@ class MainActivity : AppCompatActivity() {
     fun S_Box_calculator(){
         var s_Box_Zero_column = arrayOf(0,0)
         var s_Box_Zero_row = arrayOf(0,0)
-        
+        var s_Box_One_column = arrayOf(0,0)
+        var s_Box_One_row = arrayOf(0,0)
         for(i in s_Box_Zero_column.indices){
-            s_Box_Zero_column[i] = F_FUN[S_Box0_column[i] -1]
-            println("column $i = ${s_Box_Zero_column[i]}")
-            s_Box_Zero_row[i] = F_FUN[S_Box0_row[i] -1]
-            println("row $i = ${s_Box_Zero_row[i]}")
+            s_Box_Zero_column[i] = F_FUN[S_Box0_column[i] - 1]
+            println("s_Box_Zero_column $i = ${s_Box_Zero_column[i]}")
+            s_Box_Zero_row[i] = F_FUN[S_Box0_row[i] - 1]
+            println("s_Box_Zero_row $i = ${s_Box_Zero_row[i]}")
+            s_Box_One_column[i] = F_FUN[S_Box1_column[i] - 1]
+            println("s_Box_One_column $i = ${s_Box_One_column[i]}")
+            s_Box_One_row[i] = F_FUN[S_Box1_row[i] - 1]
+            println("s_Box_One_row $i = ${s_Box_One_row[i]}")
         }
-        var columnResult = (s_Box_Zero_column[0]*2) + (s_Box_Zero_column[1] *1)
-        var rowResult = (s_Box_Zero_row[0]*2) + (s_Box_Zero_row[1] *1)
-        println("rowResult = $rowResult")
-        println("columnResult = $columnResult")
-        var rowResult_SBox = hashMap?.S0_map?.get(rowResult)
-        var columnResult_SBox = hashMap?.S0_map?.get(columnResult)
+        var s_Box_ZeroColumnResult = (s_Box_Zero_column[0]*2) + (s_Box_Zero_column[1] *1)
+        var s_BoxZeroRowResult = (s_Box_Zero_row[0]*2) + (s_Box_Zero_row[1] *1)
+        var s_BoxOneColumnResult = (s_Box_One_column[0] * 2) + (s_Box_One_column[1] * 1)
+        var s_BoxOneRowResult = (s_Box_One_row[0] * 2) + (s_Box_One_row[1] * 1)
+        println("s_Box_ZeroRowResult = $s_BoxZeroRowResult")
+        println("s_Box_ZeroColumnResult = $s_Box_ZeroColumnResult")
+        println("s_Box_OneRowResult = $s_BoxOneRowResult")
+        println("s_Box_OneColumnResult = $s_BoxOneColumnResult")
+        var rowResult_SBoxZero = hashMap?.S0_map?.get(s_BoxZeroRowResult)
+        var s_ZeroBoxResult = rowResult_SBoxZero?.get(s_Box_ZeroColumnResult)
+        println("s_ZeroBoxResult = $s_ZeroBoxResult")
+        var rowReulst_SBoxOne = hashMap?.S1_map?.get(s_BoxOneRowResult)
+        var s_OneBoxResult = rowReulst_SBoxOne?.get(s_BoxOneColumnResult)
+        println("s_OneBoxResult = $s_OneBoxResult")
     }
 }
