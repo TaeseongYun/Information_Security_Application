@@ -17,8 +17,8 @@ class MainActivity : AppCompatActivity() {
     val IP_Index = arrayOf(2, 6, 3, 1, 4, 8, 5, 7)
     val EP_Index = arrayOf(7, 4, 5, 6, 5, 6, 7, 4)
     var F_FUN = arrayOf(0, 0, 0, 0, 0, 0, 0, 0)
-    val S_Box_column = arrayOf(1,4) //S_BOX 가로  상단 인덱스
-    val S_Box_row = arrayOf(2,3) //S_BOX 세로 좌측 인덱스
+    val S_Box1_column = arrayOf(1,4) //S_BOX 가로  상단 인덱스
+    val S_Box1_row = arrayOf(2,3) //S_BOX 세로 좌측 인덱스
     var P10 = arrayOf("0","0","0","0","0","0","0","0","0","0") //P10 값 초기화
     var subkey_Binary: String? = null // Interger.toBinaryString 해주기위해 만들어줌
     var plainText: String? = null //평서문을 넣어주는곳
@@ -30,19 +30,20 @@ class MainActivity : AppCompatActivity() {
     var K2 = arrayOf("0","0","0","0","0","0","0","0") //K2 초기화
     var security_sentence: ArrayList<String>? = null
     var recovery_Sentence: ArrayList<String>? = null
+    var hashMap: HashMapadd? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        var hashmap = HashMapadd()
-        hashmap.S1_map_add()
-        hashmap.S0_map_add()
+        hashMap = HashMapadd()
+        hashMap?.S1_map_add()
+        hashMap?.S0_map_add()
 
 
         for(i in 0..3)
-            println("S0_map 의 안에 내용 ${hashmap.S0_map.get(i)}")
+            println("S0_map 의 안에 내용 ${hashMap?.S0_map?.get(i)}")
         for(i in 0..3)
-            println("S1_map 의 내용 ${hashmap.S1_map.get(i)}")
+            println("S1_map 의 내용 ${hashMap?.S1_map?.get(i)}")
 
         button_security.setOnClickListener { v ->
 //            서브키값 체크 하는 함수
@@ -199,18 +200,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
     fun S_Box_calculator(){
-        var column = arrayOf(0,0)
-        var row = arrayOf(0,0)
-        for(i in column.indices){
-            column[i] = F_FUN[S_Box_column[i] -1]
-            println("column $i = ${column[i]}")
-            row[i] = F_FUN[S_Box_row[i] -1]
-            println("row $i = ${row[i]}")
+        var s_Box_One_column = arrayOf(0,0)
+        var s_Box_One_row = arrayOf(0,0)
+        for(i in s_Box_One_column.indices){
+            s_Box_One_column[i] = F_FUN[S_Box1_column[i] -1]
+            println("column $i = ${s_Box_One_column[i]}")
+            s_Box_One_row[i] = F_FUN[S_Box1_row[i] -1]
+            println("row $i = ${s_Box_One_row[i]}")
         }
-        var columnResult = (column[0]*2) + (column[1] *1)
-        var rowResult = (row[0]*2) + (row[1] *1)
+        var columnResult = (s_Box_One_column[0]*2) + (s_Box_One_column[1] *1)
+        var rowResult = (s_Box_One_row[0]*2) + (s_Box_One_row[1] *1)
         println("rowResult = $rowResult")
         println("columnResult = $columnResult")
-
+        var rowResult_SBox = hashMap?.S0_map?.get(rowResult)
+        var columnResult_SBox = hashMap?.S0_map?.get(columnResult)
     }
 }
