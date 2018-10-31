@@ -17,8 +17,8 @@ class MainActivity : AppCompatActivity() {
     val IP_Index = arrayOf(2, 6, 3, 1, 4, 8, 5, 7)
     val EP_Index = arrayOf(7, 4, 5, 6, 5, 6, 7, 4)
     var F_FUN = arrayOf(0, 0, 0, 0, 0, 0, 0, 0)
-    val S_Box1_column = arrayOf(1,4) //S_BOX 가로  상단 인덱스
-    val S_Box1_row = arrayOf(2,3) //S_BOX 세로 좌측 인덱스
+    val S_Box0_column = arrayOf(1,4) //S_BOX 가로  상단 인덱스
+    val S_Box0_row = arrayOf(2,3) //S_BOX 세로 좌측 인덱스
     var P10 = arrayOf("0","0","0","0","0","0","0","0","0","0") //P10 값 초기화
     var subkey_Binary: String? = null // Interger.toBinaryString 해주기위해 만들어줌
     var plainText: String? = null //평서문을 넣어주는곳
@@ -200,16 +200,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
     fun S_Box_calculator(){
-        var s_Box_One_column = arrayOf(0,0)
-        var s_Box_One_row = arrayOf(0,0)
-        for(i in s_Box_One_column.indices){
-            s_Box_One_column[i] = F_FUN[S_Box1_column[i] -1]
-            println("column $i = ${s_Box_One_column[i]}")
-            s_Box_One_row[i] = F_FUN[S_Box1_row[i] -1]
-            println("row $i = ${s_Box_One_row[i]}")
+        var s_Box_Zero_column = arrayOf(0,0)
+        var s_Box_Zero_row = arrayOf(0,0)
+        
+        for(i in s_Box_Zero_column.indices){
+            s_Box_Zero_column[i] = F_FUN[S_Box0_column[i] -1]
+            println("column $i = ${s_Box_Zero_column[i]}")
+            s_Box_Zero_row[i] = F_FUN[S_Box0_row[i] -1]
+            println("row $i = ${s_Box_Zero_row[i]}")
         }
-        var columnResult = (s_Box_One_column[0]*2) + (s_Box_One_column[1] *1)
-        var rowResult = (s_Box_One_row[0]*2) + (s_Box_One_row[1] *1)
+        var columnResult = (s_Box_Zero_column[0]*2) + (s_Box_Zero_column[1] *1)
+        var rowResult = (s_Box_Zero_row[0]*2) + (s_Box_Zero_row[1] *1)
         println("rowResult = $rowResult")
         println("columnResult = $columnResult")
         var rowResult_SBox = hashMap?.S0_map?.get(rowResult)
