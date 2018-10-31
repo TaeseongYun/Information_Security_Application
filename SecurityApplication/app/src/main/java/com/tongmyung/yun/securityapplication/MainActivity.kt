@@ -17,6 +17,8 @@ class MainActivity : AppCompatActivity() {
     val IP_Index = arrayOf(2, 6, 3, 1, 4, 8, 5, 7)
     val EP_Index = arrayOf(7, 4, 5, 6, 5, 6, 7, 4)
     var F_FUN = arrayOf(0, 0, 0, 0, 0, 0, 0, 0)
+    val S_Box_column = arrayOf(1,4) //S_BOX 가로  상단 인덱스
+    val S_Box_row = arrayOf(2,3) //S_BOX 세로 좌측 인덱스
     var P10 = arrayOf("0","0","0","0","0","0","0","0","0","0") //P10 값 초기화
     var subkey_Binary: String? = null // Interger.toBinaryString 해주기위해 만들어줌
     var plainText: String? = null //평서문을 넣어주는곳
@@ -142,6 +144,7 @@ class MainActivity : AppCompatActivity() {
             println("EP index $i = ${E_P[0]} ${E_P[1]} ${E_P[2]} ${E_P[3]} ${E_P[4]} ${E_P[5]} ${E_P[6]} ${E_P[7]}")
             exclusiveOR_EP()
             println("F_Fun $i = ${F_FUN[0]} ${F_FUN[1]} ${F_FUN[2]} ${F_FUN[3]} ${F_FUN[4]} ${F_FUN[5]} ${F_FUN[6]} ${F_FUN[7]}")
+            S_Box_calculator()
         }
     }
     fun make_IP(){ //IP 만드는 함수
@@ -194,5 +197,20 @@ class MainActivity : AppCompatActivity() {
             else
                 F_FUN[i] = 1
         }
+    }
+    fun S_Box_calculator(){
+        var column = arrayOf(0,0)
+        var row = arrayOf(0,0)
+        for(i in column.indices){
+            column[i] = F_FUN[S_Box_column[i] -1]
+            println("column $i = ${column[i]}")
+            row[i] = F_FUN[S_Box_row[i] -1]
+            println("row $i = ${row[i]}")
+        }
+        var columnResult = (column[0]*2) + (column[1] *1)
+        var rowResult = (row[0]*2) + (row[1] *1)
+        println("rowResult = $rowResult")
+        println("columnResult = $columnResult")
+
     }
 }
