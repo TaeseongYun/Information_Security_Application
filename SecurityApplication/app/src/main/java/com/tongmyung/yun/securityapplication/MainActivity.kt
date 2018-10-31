@@ -1,16 +1,29 @@
 package com.tongmyung.yun.securityapplication
 
+import android.content.DialogInterface
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.app.AlertDialog
+import android.view.View
+import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
-
+/*지금 까지 입력한값 영어만 toByte()해주어서 P를 구했다
+* 한글은 2Byte인데 어떻게 8 바이트씩 나누어서 표현?
+* 영어 특수문자 는 거의 확인 다 되었음*/
 class MainActivity : AppCompatActivity() {
-    var P10 = arrayOf("0","0","0","0","0","0","0","0","0","0") //P10 초기화
-
-    var binary: String? = null // Interger.toBinaryString 해주기위해 만들어줌
-
+    val P10_Index = arrayOf(3, 5, 2, 7, 4, 10, 1, 9, 8, 6)
+    val P8_Index = arrayOf(6, 3, 7, 4, 8, 5, 10, 9)
+    var P10 = arrayOf("0","0","0","0","0","0","0","0","0","0") //P10 값 초기화
+    var subkey_Binary: String? = null // Interger.toBinaryString 해주기위해 만들어줌
+    var plainText: String? = null //평서문을 넣어주는곳
+    var plainText_Binary: String? = null // 입력한 평서문 값을 toByte() 한 결과값을 여기다가 넣어줌 즉 P값
+    var IP = arrayOf("0","0","0","0","0","0","0","0")//IP(초기 순열함수)값을  초기화 P를 토대로 다시 초기화 시켜줌
+    var IP_1 = arrayOf("0","0","0","0","0","0","0","0")//IP-1(최종 순열함수)값을 초기화 P를 토대로 다시 초기화
+    var E_P = arrayOf("0","0","0","0","0","0","0","0")
     var K1 = arrayOf("0","0","0","0","0","0","0","0") //K1 초기화
     var K2 = arrayOf("0","0","0","0","0","0","0","0") //K2 초기화
+    var security_sentence: ArrayList<String>? = null
+    var recovery_Sentence: ArrayList<String>? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -20,25 +33,25 @@ class MainActivity : AppCompatActivity() {
         hashmap.S0_map_add()
 
 
-
         for(i in 0..3)
             println("S0_map 의 안에 내용 ${hashmap.S0_map.get(i)}")
         for(i in 0..3)
             println("S1_map 의 내용 ${hashmap.S1_map.get(i)}")
 
         button_security.setOnClickListener { v ->
+//            서브키값 체크 하는 함수
+            subkey_check()
+//            P8, P10, K1, K2, P, IP, IP-1 계산하는 함수
             binaryChange()
+        }
+        button_reset.setOnClickListener { v ->
+            plainTextReset()
         }
     }
     fun binaryChange(){ //버튼 클릭시 서브키 입력  연산
         try {
-            println("버튼 클릭")
-            var subkey = input_subkey.text
-            var integer = Integer.parseInt(subkey.toString())
-            var temp = Integer.toBinaryString(integer)
-            var int_temp = Integer.valueOf(temp)
-            binary = String.format("%010d",int_temp)
-            println(binary)
+            enable_plainText()
+            subkey_Binary_make()
             P10_make()
             println("P10(key) = ${P10[0]} ${P10[1]} ${P10[2]} ${P10[3]} ${P10[4]} ${P10[5]} ${P10[6]} ${P10[7]} ${P10[8]} ${P10[9]}")
             shift_calculate()
@@ -49,15 +62,28 @@ class MainActivity : AppCompatActivity() {
             shift_calculate()
             println("LS-2 = ${P10[0]} ${P10[1]} ${P10[2]} ${P10[3]} ${P10[4]} ${P10[5]} ${P10[6]} ${P10[7]} ${P10[8]} ${P10[9]}")
             K2_make()
+            input_security_key()
             println("K2 = ${K2[0]} ${K2[1]} ${K2[2]} ${K2[3]} ${K2[4]} ${K2[5]} ${K2[6]} ${K2[7]}")
-//            var binary = Integer.toBinaryString(integer)
-//            var int = Integer.valueOf(binary)
-//            binary = String.format("%010d", int)
-//            println("binary : $")
+            plainText = input_normalKey.text.toString()
+            println("${plainText!![0]}")
+            println("P Byte : ${plainText!![0].toByte()}")
+            val test = 104
+            println("test : ${test.toChar()}")
+            make_P()
+            make_IP()
+            println("IP = ${IP[0]} ${IP[1]} ${IP[2]} ${IP[3]} ${IP[4]} ${IP[5]} ${IP[6]} ${IP[7]}")
         }
         catch (e: Exception){
             e.printStackTrace()
         }
+    }
+    fun subkey_Binary_make(){
+        var subkey = input_subkey.text
+        var subkey_integer = Integer.parseInt(subkey.toString())
+        var subkey_binary_temp = Integer.toBinaryString(subkey_integer)
+        var subkey_binary_tempToint = Integer.valueOf(subkey_binary_temp)
+        subkey_Binary = String.format("%010d",subkey_binary_tempToint)
+        println("subkey_Binary : $subkey_Binary")
     }
     fun K1_make(){ //K1 만드는 함수
         K1[0] = P10!![5]
@@ -69,7 +95,6 @@ class MainActivity : AppCompatActivity() {
         K1[6] = P10!![9]
         K1[7] = P10!![8]
     }
-
     fun K2_make(){ //K2 만드는함수
         K2[0] = P10!![5]
         K2[1] = P10!![2]
@@ -81,16 +106,18 @@ class MainActivity : AppCompatActivity() {
         K2[7] = P10!![8]
     }
     fun P10_make(){ //P10 만드는 함수
-        P10[0] = binary!![2].toString()
-        P10[1] = binary!![4].toString()
-        P10[2] = binary!![1].toString()
-        P10[3] = binary!![6].toString()
-        P10[4] = binary!![3].toString()
-        P10[5] = binary!![9].toString()
-        P10[6] = binary!![0].toString()
-        P10[7] = binary!![8].toString()
-        P10[8] = binary!![7].toString()
-        P10[9] = binary!![5].toString()
+//        P10[0] = subkey_Binary!![2].toString()
+//        P10[1] = subkey_Binary!![4].toString()
+//        P10[2] = subkey_Binary!![1].toString()
+//        P10[3] = subkey_Binary!![6].toString()
+//        P10[4] = subkey_Binary!![3].toString()
+//        P10[5] = subkey_Binary!![9].toString()
+//        P10[6] = subkey_Binary!![0].toString()
+//        P10[7] = subkey_Binary!![8].toString()
+//        P10[8] = subkey_Binary!![7].toString()
+//        P10[9] = subkey_Binary!![5].toString()
+        for(i in P10.indices)
+            P10[i] = subkey_Binary!![P10_Index[i] - 1].toString()
     }
     fun shift_calculate(){ //쉬프트 연산 함수
         var temp = P10[0]
@@ -103,5 +130,90 @@ class MainActivity : AppCompatActivity() {
             P10[i-1] = P10[i]
         }
         P10[9] = temp
+    }
+    fun input_security_key(){
+        var P10_list = ArrayList<String>()
+        var K1_list = ArrayList<String>()
+        var K2_list = ArrayList<String>()
+        for(i in P10.indices)
+            P10_list.add(P10[i])
+
+        for(j in K1.indices)
+            K1_list.add(K1[j])
+
+        for(x in K2.indices)
+            K2_list.add(K2[x])
+        textView_P10.text = P10_list.toString()
+        textView_K1.text = K1_list.toString()
+        textView_K2.text = K2_list.toString()
+    }
+    fun make_P(){
+        for(i in plainText?.indices!!){
+            var P_integer = plainText!![i].toByte()
+            var P_temp = Integer.toBinaryString(P_integer.toInt())
+            var P_temp_To_Int = Integer.valueOf(P_temp)
+            plainText_Binary = String.format("%08d",P_temp_To_Int)
+            println("plainText_Binary : $plainText_Binary")
+            make_IP()
+            E_P_make()
+        }
+    }
+    fun make_IP(){
+        IP[0] = plainText_Binary!![1].toString()
+        IP[1] = plainText_Binary!![5].toString()
+        IP[2] = plainText_Binary!![2].toString()
+        IP[3] = plainText_Binary!![0].toString()
+        IP[4] = plainText_Binary!![3].toString()
+        IP[5] = plainText_Binary!![7].toString()
+        IP[6] = plainText_Binary!![4].toString()
+        IP[7] = plainText_Binary!![6].toString()
+    }
+    fun subkey_check(){
+        var range = input_subkey.text
+        var range_Integer = Integer.parseInt(range.toString())
+        if(range_Integer > 1023 || range_Integer < 0){
+//            서브키 입력값이 1024 이상 이면 알람 뜨게 만들어줌
+            var alertDialog = AlertDialog.Builder(this)
+            alertDialog.setTitle("서브키 값 범위초과")
+                    .setMessage("서브키 값은 0~1023까지 입니다. 다시 입력해주세요\n 확인을 누르면 초기화가 됩니다.")
+                    .setIcon(R.drawable.danger_icon)
+                    .setPositiveButton("확인", {dialog: DialogInterface?, which: Int ->
+                        input_subkey.text.clear()
+                        input_normalKey.text.clear()
+                    })
+                    .setNegativeButton("취소",{dialog: DialogInterface?, which: Int ->
+                        dialog?.dismiss()
+                    })
+                    .show()
+        }
+    }
+//    암호화 시작됬으면 수정 못하게 막아둠
+    fun enable_plainText(){
+        input_subkey.isEnabled = false
+        input_normalKey.isEnabled = false
+    }
+//    초기화 버튼 눌렸을때 반응 하는 함수
+    fun plainTextReset(){
+        input_subkey.isEnabled = true
+        input_normalKey.isEnabled = true
+        input_subkey.text.clear()
+        input_normalKey.text.clear()
+        textView_P10.text = "HERE IS P10_RESULT"
+        textView_K1.text = "HERE IS K1_RESULT"
+        textView_K2.text = "HERE IS K2_RESULT"
+        Toast.makeText(this,"초기화가 완료 되었습니다",Toast.LENGTH_SHORT).show()
+    }
+    fun E_P_make(){
+        E_P[0] = IP[6]
+        E_P[1] = IP[3]
+        E_P[2] = IP[4]
+        E_P[3] = IP[5]
+        E_P[4] = IP[4]
+        E_P[5] = IP[5]
+        E_P[6] = IP[6]
+        E_P[7] = IP[3]
+    }
+    fun exclusiveOR(){
+
     }
 }
