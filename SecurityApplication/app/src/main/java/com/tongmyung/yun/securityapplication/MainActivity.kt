@@ -1,6 +1,7 @@
 package com.tongmyung.yun.securityapplication
 
 import android.content.DialogInterface
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
@@ -12,6 +13,8 @@ import kotlinx.android.synthetic.main.activity_main.*
 * 영어 특수문자 는 거의 확인 다 되었음*
 * 지금 EP와 IP XOR 까지 구현 완료 했음 이제 뒤에 S박스를 하는것만 남음
 * 2018-11-01 S박스 구현 완료*/
+//SBox 계산 하는 함수 즉 F(R,SK)에서 확장시켜주고 SBox값 찾아가는것 까지 구현 완료
+//이제 스위치 하는 것 남았음
 class MainActivity : AppCompatActivity() {
     val P10_Index = arrayOf(3, 5, 2, 7, 4, 10, 1, 9, 8, 6)
     val P8_Index = arrayOf(6, 3, 7, 4, 8, 5, 10, 9)
@@ -22,6 +25,9 @@ class MainActivity : AppCompatActivity() {
     val S_Box0_row = arrayOf(2,3) //S_BOX0 세로 좌측 인덱스
     val S_Box1_column = arrayOf(5,8) //S_Box1 가로 상단 인덱스
     val S_Box1_row = arrayOf(6,7) //S_Box 1 세로 좌측 인덱스
+    val LEFT = arrayOf(1,2,3,4)
+    val RIGHT = arrayOf(5,6,7,8)
+    val P4 = arrayOf(2,4,3,1)
     var P10 = arrayOf("0","0","0","0","0","0","0","0","0","0") //P10 값 초기화
     var subkey_Binary: String? = null // Interger.toBinaryString 해주기위해 만들어줌
     var plainText: String? = null //평서문을 넣어주는곳
@@ -31,9 +37,15 @@ class MainActivity : AppCompatActivity() {
     var E_P = arrayOf("0","0","0","0","0","0","0","0")
     var K1 = arrayOf("0","0","0","0","0","0","0","0") //K1 초기화
     var K2 = arrayOf("0","0","0","0","0","0","0","0") //K2 초기화
-    var security_sentence: ArrayList<String>? = null
-    var recovery_Sentence: ArrayList<String>? = null
+    var security_sentence: ArrayList<String>? = null //암호화 시킨 문장
+    var recovery_Sentence: ArrayList<String>? = null //복구화 시킨 문장
     var hashMap: HashMapadd? = null
+    var binarySBoxZeroResult: String? = null
+    var binarySBoxOneResult: String? = null
+    var SBoxResult = arrayOf("0","0","0","0") //P4 다끝나고 결과값 저장
+    var SBoxResultTemp = arrayOf("0","0","0","0") //P4해주기전에 잠깐 결과값만 저장해두는 배열
+    val SBoxIndex = arrayOf(2,3)
+    var fkResultLeft = arrayOf("0","0","0","0")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -75,10 +87,6 @@ class MainActivity : AppCompatActivity() {
             input_security_key()
             println("K2 = ${K2[0]} ${K2[1]} ${K2[2]} ${K2[3]} ${K2[4]} ${K2[5]} ${K2[6]} ${K2[7]}")
             plainText = input_normalKey.text.toString()
-            println("${plainText!![0]}")
-            println("P Byte : ${plainText!![0].toByte()}")
-            val test = 104
-            println("test : ${test.toChar()}")
             make_P()
 //            make_IP()
 //            println("IP = ${IP[0]} ${IP[1]} ${IP[2]} ${IP[3]} ${IP[4]} ${IP[5]} ${IP[6]} ${IP[7]}")
@@ -139,6 +147,7 @@ class MainActivity : AppCompatActivity() {
         for(i in plainText?.indices!!){
             var P_integer = plainText!![i].toByte()
             var P_temp = Integer.toBinaryString(P_integer.toInt())
+            println("P_temp = plainText.toByte = ${P_temp}")
             var P_temp_To_Int = Integer.valueOf(P_temp)
             plainText_Binary = String.format("%08d",P_temp_To_Int)
             println("plainText_Binary : $plainText_Binary")
@@ -190,7 +199,7 @@ class MainActivity : AppCompatActivity() {
         textView_K2.text = "HERE IS K2_RESULT"
         Toast.makeText(this,"초기화가 완료 되었습니다",Toast.LENGTH_SHORT).show()
     }
-    fun E_P_make(){
+    fun E_P_make(){ //EP 만들어주는 함수
         for(i in E_P.indices)
             E_P[i] = IP[EP_Index[i]]
     }
@@ -202,20 +211,20 @@ class MainActivity : AppCompatActivity() {
                 F_FUN[i] = 1
         }
     }
-    fun S_Box_calculator(){
+    fun S_Box_calculator(){ //SBox 계산 하는 함수 즉 F(R,SK)에서 확장시켜주고 SBox값 찾아가는것 까지 구현 완료
         var s_Box_Zero_column = arrayOf(0,0)
         var s_Box_Zero_row = arrayOf(0,0)
         var s_Box_One_column = arrayOf(0,0)
         var s_Box_One_row = arrayOf(0,0)
         for(i in s_Box_Zero_column.indices){
             s_Box_Zero_column[i] = F_FUN[S_Box0_column[i] - 1]
-            println("s_Box_Zero_column $i = ${s_Box_Zero_column[i]}")
+            println("s_Box_Zero_column(가로 인덱스) $i = ${s_Box_Zero_column[i]}")
             s_Box_Zero_row[i] = F_FUN[S_Box0_row[i] - 1]
-            println("s_Box_Zero_row $i = ${s_Box_Zero_row[i]}")
+            println("s_Box_Zero_row(세로인덱스) $i = ${s_Box_Zero_row[i]}")
             s_Box_One_column[i] = F_FUN[S_Box1_column[i] - 1]
-            println("s_Box_One_column $i = ${s_Box_One_column[i]}")
+            println("s_Box_One_column(가로 인덱스) $i = ${s_Box_One_column[i]}")
             s_Box_One_row[i] = F_FUN[S_Box1_row[i] - 1]
-            println("s_Box_One_row $i = ${s_Box_One_row[i]}")
+            println("s_Box_One_row(세로 인덱스) $i = ${s_Box_One_row[i]}")
         }
         var s_Box_ZeroColumnResult = (s_Box_Zero_column[0]*2) + (s_Box_Zero_column[1] *1)
         var s_BoxZeroRowResult = (s_Box_Zero_row[0]*2) + (s_Box_Zero_row[1] *1)
@@ -231,5 +240,41 @@ class MainActivity : AppCompatActivity() {
         var rowReulst_SBoxOne = hashMap?.S1_map?.get(s_BoxOneRowResult)
         var s_OneBoxResult = rowReulst_SBoxOne?.get(s_BoxOneColumnResult)
         println("s_OneBoxResult = $s_OneBoxResult")
+        var s_ZeroBoxResultToBinary = Integer.toBinaryString(s_ZeroBoxResult!!)
+        var s_OneBoxResultToBinary = Integer.toBinaryString(s_OneBoxResult!!)
+        var s_ZeroBoxResultToBinaryInt = Integer.valueOf(s_ZeroBoxResultToBinary)
+        var s_OneBoxResultToBinaryInt = Integer.valueOf(s_OneBoxResultToBinary)
+        binarySBoxZeroResult = String.format("%02d", s_ZeroBoxResultToBinaryInt)
+        binarySBoxOneResult = String.format("%02d", s_OneBoxResultToBinaryInt)
+        println("binarySBoxZeroResult = $binarySBoxZeroResult")
+        println("binarySBoxOneResult = $binarySBoxOneResult")
+        SBoxResultInput()
+        leftIPXorFfun()
+    }
+    fun SBoxResultInput(){ //SBox 결과값 넣어주는 함수
+        for(i in binarySBoxZeroResult?.indices!!) {
+            println("index = $i")
+            SBoxResultTemp[i] = binarySBoxZeroResult!![i].toString()
+            SBoxResultTemp[SBoxIndex[i]] = binarySBoxOneResult!![i].toString()
+        }
+        for(i in SBoxResultTemp.indices)
+            println("SBoxResultTemp index $i = ${SBoxResultTemp[i]}")
+
+        for(i in SBoxResult.indices) { //P4 순서대로 다시 정렬
+            SBoxResult[i] = SBoxResultTemp[P4[i] - 1]
+            println("SBoxResult index $i = ${SBoxResult[i]}")
+        }
+    }
+    fun leftIPXorFfun(){
+        for(i in SBoxResult.indices){
+            if(SBoxResult[i] == IP[LEFT[i] - 1])
+                fkResultLeft[i] = "0"
+            else
+                fkResultLeft[i] = "1"
+        }
+        for(i in fkResultLeft.indices)
+            IP[i] = fkResultLeft[i]
+
+        println("Finish fk = ${IP[0]} ${IP[1]} ${IP[2]} ${IP[3]} ${IP[4]} ${IP[5]} ${IP[6]} ${IP[7]}")
     }
 }
