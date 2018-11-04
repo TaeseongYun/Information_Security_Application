@@ -1,12 +1,11 @@
 package com.tongmyung.yun.securityapplication
 
 import android.content.DialogInterface
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
+import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
-import java.nio.charset.Charset
 
 /*지금 까지 입력한값 영어만 toByte()해주어서 P를 구했다
 * 한글은 2Byte인데 어떻게 8 바이트씩 나누어서 표현?
@@ -42,6 +41,7 @@ class MainActivity : AppCompatActivity() {
     var K1 = arrayOf("0", "0", "0", "0", "0", "0", "0", "0") //K1 초기화
     var K2 = arrayOf("0", "0", "0", "0", "0", "0", "0", "0") //K2 초기화
     var security_sentence: String? = null //암호화 시킨 문장
+    var security_sentence_Binary: String? = null
     var recovery_Sentence: ArrayList<String>? = null //복구화 시킨 문장
     var hashMap: HashMapadd? = null
     var binarySBoxZeroResult: String? = null
@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity() {
 
             textView_security_sentence.text = security_sentence.toString()
         }
-        button_insecurity.setOnClickListener{
+        button_insecurity.setOnClickListener {
             decryption()
         }
         button_reset.setOnClickListener { v ->
@@ -189,7 +189,10 @@ class MainActivity : AppCompatActivity() {
         for (i in IP.indices)
             IP[i] = plainText_Binary!![IP_Index[i] - 1].toString()
     }
-
+    fun make_security_IP(){
+        for(i in IP.indices)
+            IP[i] = security_sentence_Binary!![IP_Index[i] - 1].toString()
+    }
     fun subkey_check() {
         var range = input_subkey.text
         var range_Integer = Integer.parseInt(range.toString())
@@ -346,30 +349,34 @@ class MainActivity : AppCompatActivity() {
 
         println("security_sentence = ${security_sentence}")
     }
-    fun decryption(){
+
+    fun decryption() {
         for (i in security_sentence?.indices!!) {
-            val charset = Charsets.UTF_8 //UTF_8로 지정
-            var P_integer = security_sentence?.toByteArray(charset)?.toString() //UTF_8로 지정한것을 바이트로 바꾸고 스트링으로 변환
-            println("security_sentence[$i] = ${security_sentence!![i]}")
-            println("P_integer = ${P_integer}")
-//            var P_temp = Integer.toBinaryString(P_integer!!.toInt())
-//            println("P_temp = plainText.toByte = ${P_temp}")
-            println("security_sentence.getByte = ${security_sentence!![i].toByte()}")
-//            var P_temp_To_Int = Integer.valueOf(P_temp)
-//            plainText_Binary = String.format("%08d", P_temp_To_Int)
-            println("plainText_Binary : ${plainText_Binary}")
-            make_IP()
+            var security_sentence_To_Byte = security_sentence!![i]?.toByte() // 암호문장 앞의것부터 바이트로 바꿈
+
+            security_sentence_To_Byte = if(security_sentence_To_Byte < 0)  //Byte값이 0보다 작으면 +값되도록 표현식으로 하였음
+                (-security_sentence_To_Byte).toByte()
+            else
+                security_sentence_To_Byte
+
+            var security_sentence_toBinaryString = Integer.toBinaryString(security_sentence_To_Byte.toInt()) //바이트 해준것 2진수로 표현
+            println("temp = $security_sentence_To_Byte")
+            println("binary = $security_sentence_toBinaryString")
+            var security_To_Int = Integer.valueOf(security_sentence_toBinaryString) //int 형으로 변환 해줌
+            security_sentence_Binary = String.format("%08d", security_To_Int) //8자리가 안되면 8자리로 맞춰서 해줌
+            println("security_sentence_Binary = $security_sentence_Binary")
+            make_security_IP()
             println("IP index $i = ${IP[0]} ${IP[1]} ${IP[2]} ${IP[3]} ${IP[4]} ${IP[5]} ${IP[6]} ${IP[7]}")
             E_P_make()//처음 fk 했을때 E_P 확장 시켜주기
             println("EP index $i = ${E_P[0]} ${E_P[1]} ${E_P[2]} ${E_P[3]} ${E_P[4]} ${E_P[5]} ${E_P[6]} ${E_P[7]}")
-            exclusiveOR_EP_K1()
-            println("F_Fun $i = ${F_FUN[0]} ${F_FUN[1]} ${F_FUN[2]} ${F_FUN[3]} ${F_FUN[4]} ${F_FUN[5]} ${F_FUN[6]} ${F_FUN[7]}")
-            S_Box_calculator()
-            switchFun()
-            E_P_make()//두번째 K2로 할때 확장
-            exclusiveOR_EP_K2()
-            S_Box_calculator()
-            security_IP_1()
+//            exclusiveOR_EP_K1()
+//            println("F_Fun $i = ${F_FUN[0]} ${F_FUN[1]} ${F_FUN[2]} ${F_FUN[3]} ${F_FUN[4]} ${F_FUN[5]} ${F_FUN[6]} ${F_FUN[7]}")
+//            S_Box_calculator()
+//            switchFun()
+//            E_P_make()//두번째 K2로 할때 확장
+//            exclusiveOR_EP_K2()
+//            S_Box_calculator()
+//            security_IP_1()
         }
     }
 }
