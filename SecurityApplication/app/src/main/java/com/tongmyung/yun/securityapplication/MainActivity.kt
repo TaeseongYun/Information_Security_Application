@@ -16,6 +16,7 @@ import java.nio.charset.Charset
 //SBox 계산 하는 함수 즉 F(R,SK)에서 확장시켜주고 SBox값 찾아가는것 까지 구현 완료
 //이제 스위치 하는 것 남았음
 //암호화 작성완료 복호화만 남았음!
+//복호화 완료 그런데 한글 안됨
 class MainActivity : AppCompatActivity() {
     val P10_Index = arrayOf(3, 5, 2, 7, 4, 10, 1, 9, 8, 6)
     val P8_Index = arrayOf(6, 3, 7, 4, 8, 5, 10, 9)
@@ -28,7 +29,6 @@ class MainActivity : AppCompatActivity() {
     val S_Box1_row = arrayOf(5, 8) //S_Box1 가로 상단 인덱스
     val S_Box1_column = arrayOf(6, 7) //S_Box 1 세로 좌측 인덱스
     val LEFT = arrayOf(1, 2, 3, 4)
-    val RIGHT = arrayOf(5, 6, 7, 8)
     val P4 = arrayOf(2, 4, 3, 1)
     val switch_FromLeftToRight = arrayOf(5, 6, 7, 8) //왼쪽것을 오른쪽으로 옮기는 변수
     val switch_FromRightToLeft = arrayOf(1, 2, 3, 4) //오른쪽것을 왼쪽으로 옮기는 변수
@@ -89,21 +89,14 @@ class MainActivity : AppCompatActivity() {
             enable_plainText()
             subkey_Binary_make()
             P10_make()
-//            println("P10(key) = ${P10[0]} ${P10[1]} ${P10[2]} ${P10[3]} ${P10[4]} ${P10[5]} ${P10[6]} ${P10[7]} ${P10[8]} ${P10[9]}")
             shift_calculate()
-//            println("LS-1 = ${P10[0]} ${P10[1]} ${P10[2]} ${P10[3]} ${P10[4]} ${P10[5]} ${P10[6]} ${P10[7]} ${P10[8]} ${P10[9]}")
             K1_make()
-//            println("K1 = ${K1[0]} ${K1[1]} ${K1[2]} ${K1[3]} ${K1[4]} ${K1[5]} ${K1[6]} ${K1[7]}")
             shift_calculate() // 두번불렀으니 두번 shift 연산
             shift_calculate()
-//            println("LS-2 = ${P10[0]} ${P10[1]} ${P10[2]} ${P10[3]} ${P10[4]} ${P10[5]} ${P10[6]} ${P10[7]} ${P10[8]} ${P10[9]}")
             K2_make()
             input_security_key()
-//            println("K2 = ${K2[0]} ${K2[1]} ${K2[2]} ${K2[3]} ${K2[4]} ${K2[5]} ${K2[6]} ${K2[7]}")
             plainText = input_normalKey.text.toString()
             make_P()
-//            make_IP()
-//            println("IP = ${IP[0]} ${IP[1]} ${IP[2]} ${IP[3]} ${IP[4]} ${IP[5]} ${IP[6]} ${IP[7]}")
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -165,25 +158,22 @@ class MainActivity : AppCompatActivity() {
 
     fun make_P() { //이 함수 안에 EP 만드는것 있고 IP 만드는것 있음
         for (i in plainText?.indices!!) {
-            var P_integer = plainText!![i].toByte()
-//            println("plainText[$i] = ${plainText!![i]}")
-            var P_temp = Integer.toBinaryString(P_integer.toInt())
-//            println("P_temp = plainText.toByte = ${P_temp}")
-//            println("plainText.getByte = ${plainText!![i].toByte()}")
+            var P_integer = plainText!![i].toByte() //평문을 byte로 변환
+            var P_temp = Integer.toBinaryString(P_integer.toInt()) //인트형으로 전환
             var P_temp_To_Int = Integer.valueOf(P_temp)
-            plainText_Binary = String.format("%08d", P_temp_To_Int)
-//            println("plainText_Binary : ${plainText_Binary}")
-            make_IP()
-//            println("IP index $i = ${IP[0]} ${IP[1]} ${IP[2]} ${IP[3]} ${IP[4]} ${IP[5]} ${IP[6]} ${IP[7]}")
+
+
+            plainText_Binary = String.format("%08d", P_temp_To_Int) //숫자가 8개가 안되면 0으로 채워줌
+
+
+            make_IP() // IP만들어주는 함수
             E_P_make()//처음 fk 했을때 E_P 확장 시켜주기
-//            println("EP index $i = ${E_P[0]} ${E_P[1]} ${E_P[2]} ${E_P[3]} ${E_P[4]} ${E_P[5]} ${E_P[6]} ${E_P[7]}")
-            exclusiveOR_EP_K1()
-//            println("F_Fun $i = ${F_FUN[0]} ${F_FUN[1]} ${F_FUN[2]} ${F_FUN[3]} ${F_FUN[4]} ${F_FUN[5]} ${F_FUN[6]} ${F_FUN[7]}")
-            S_Box_calculator()
-            switchFun()
+            exclusiveOR_EP_K1() //K1과 XOR
+            S_Box_calculator() //S-Box 계산
+            switchFun()//스위치
             E_P_make()//두번째 K2로 할때 확장
-            exclusiveOR_EP_K2()
-            S_Box_calculator()
+            exclusiveOR_EP_K2() //K2와 XOR
+            S_Box_calculator() //S-Box 계산
             security_IP_1()
         }
     }
@@ -228,6 +218,9 @@ class MainActivity : AppCompatActivity() {
         textView_P10.text = "HERE IS P10_RESULT"
         textView_K1.text = "HERE IS K1_RESULT"
         textView_K2.text = "HERE IS K2_RESULT"
+        textView_security_sentence.text = "암호화문장"
+        textView_decrytionText.text = "복호화문장"
+
         Toast.makeText(this, "초기화가 완료 되었습니다", Toast.LENGTH_SHORT).show()
     }
 
@@ -261,53 +254,44 @@ class MainActivity : AppCompatActivity() {
         var s_Box_One_column = arrayOf(0, 0)
         for (i in s_Box_Zero_column.indices) {
             s_Box_Zero_row[i] = F_FUN[S_Box0_row[i] - 1]
-//            println("s_Box_Zero_row(가로 인덱스) $i = ${s_Box_Zero_row[i]}")
             s_Box_Zero_column[i] = F_FUN[S_Box0_column[i] - 1]
-//            println("s_Box_Zero_column(세로인덱스) $i = ${s_Box_Zero_column[i]}")
             s_Box_One_row[i] = F_FUN[S_Box1_row[i] - 1]
-//            println("s_Box_One_column(가로 인덱스) $i = ${s_Box_One_row[i]}")
             s_Box_One_column[i] = F_FUN[S_Box1_column[i] - 1]
-//            println("s_Box_One_column(세로 인덱스) $i = ${s_Box_One_column[i]}")
         }
         var s_Box_ZeroRowResult = (s_Box_Zero_row[0] * 2) + (s_Box_Zero_row[1] * 1)
         var s_Box_ZeroColumnResult = (s_Box_Zero_column[0] * 2) + (s_Box_Zero_column[1] * 1)
         var s_BoxOneRowResult = (s_Box_One_row[0] * 2) + (s_Box_One_row[1] * 1)
         var s_BoxOneColumnResult = (s_Box_One_column[0] * 2) + (s_Box_One_column[1] * 1)
-//        println("s_Box_ZeroRowResult = $s_Box_ZeroRowResult")
-//        println("s_Box_ZeroColumnResult = $s_Box_ZeroColumnResult")
-//        println("s_Box_OneRowResult = $s_BoxOneRowResult")
-//        println("s_Box_OneColumnResult = $s_BoxOneColumnResult")
+
+
         var rowResult_SBoxZero = hashMap?.S0_map?.get(s_Box_ZeroRowResult)
         var s_ZeroBoxResult = rowResult_SBoxZero?.get(s_Box_ZeroColumnResult)
-//        println("s_ZeroBoxResult = $s_ZeroBoxResult")
         var rowReulst_SBoxOne = hashMap?.S1_map?.get(s_BoxOneRowResult)
         var s_OneBoxResult = rowReulst_SBoxOne?.get(s_BoxOneColumnResult)
-//        println("s_OneBoxResult = $s_OneBoxResult")
+
         var s_ZeroBoxResultToBinary = Integer.toBinaryString(s_ZeroBoxResult!!)
         var s_OneBoxResultToBinary = Integer.toBinaryString(s_OneBoxResult!!)
+
         var s_ZeroBoxResultToBinaryInt = Integer.valueOf(s_ZeroBoxResultToBinary)
         var s_OneBoxResultToBinaryInt = Integer.valueOf(s_OneBoxResultToBinary)
+
+
         binarySBoxZeroResult = String.format("%02d", s_ZeroBoxResultToBinaryInt)
         binarySBoxOneResult = String.format("%02d", s_OneBoxResultToBinaryInt)
-//        println("binarySBoxZeroResult = $binarySBoxZeroResult")
-//        println("binarySBoxOneResult = $binarySBoxOneResult")
+
         SBoxResultInput()
         leftIPXorFfun()
     }
 
     fun SBoxResultInput() { //SBox 결과값 넣어주는 함수
         for (i in binarySBoxZeroResult?.indices!!) {
-//            println("index = $i")
             SBoxResultTemp[i] = binarySBoxZeroResult!![i].toString()
             SBoxResultTemp[SBoxIndex[i]] = binarySBoxOneResult!![i].toString()
         }
-        for (i in SBoxResultTemp.indices)
-//            println("SBoxResultTemp index $i = ${SBoxResultTemp[i]}")
 
-        for (i in SBoxResult.indices) { //P4 순서대로 다시 정렬
+        for (i in SBoxResult.indices) //P4 순서대로 다시 정렬
             SBoxResult[i] = SBoxResultTemp[P4[i] - 1]
-//            println("SBoxResult index $i = ${SBoxResult[i]}")
-        }
+
     }
 
     fun leftIPXorFfun() {
@@ -319,8 +303,6 @@ class MainActivity : AppCompatActivity() {
         }
         for (i in fkResultLeft.indices)
             IP[i] = fkResultLeft[i]
-
-//        println("Finish fk = ${IP[0]} ${IP[1]} ${IP[2]} ${IP[3]} ${IP[4]} ${IP[5]} ${IP[6]} ${IP[7]}")
     }
 
     fun switchFun() {
@@ -332,22 +314,17 @@ class MainActivity : AppCompatActivity() {
             IP[switch_FromRightToLeft[i] - 1] = tempRightFour[i]
             IP[switch_FromLeftToRight[i] - 1] = tempLeftFour[i]
         }
-//        println("switch_fk = ${IP[0]} ${IP[1]} ${IP[2]} ${IP[3]} ${IP[4]} ${IP[5]} ${IP[6]} ${IP[7]}")
     }
 
     fun security_IP_1() {
         for (i in IP_1_Index.indices) {
             IP_1[i] = IP[IP_1_Index[i] - 1]
         }
-//        println("IP_1 = ${IP_1[0]} ${IP_1[1]} ${IP_1[2]} ${IP_1[3]} ${IP_1[4]} ${IP_1[5]} ${IP_1[6]} ${IP_1[7]}")
 
         var str = (IP_1[0] + IP_1[1] + IP_1[2] + IP_1[3] + IP_1[4] + IP_1[5] + IP_1[6] + IP_1[7]).trim()
-//        println("$str")
         var security_char = Integer.parseInt(str, 2) //첫번째 매개변수 string 두번째 n진수
 
         security_sentence += (security_char.toChar().toString())
-
-//        println("security_sentence = ${security_sentence}")
     }
     fun decrytion_IP_1(){
         for (i in IP_1_Index.indices) {
@@ -370,33 +347,16 @@ class MainActivity : AppCompatActivity() {
     }
     fun decryption() {
         for (i in security_sentence?.indices!!) {
-//            val charset = Charsets.UTF_8 //UTF_8로 지정
-//            var P_integer = security_sentence?.toByteArray(charset) //UTF_8로 지정한것을 바이트로 바꾸고 스트링으로 변환
             var security_sentence_To_Byte = security_sentence!![i]?.toInt() // 암호문장 앞의것부터 바이트로 바꿈
-
-//            security_sentence_To_Byte = if (security_sentence_To_Byte < 0)  //Byte값이 0보다 작으면 +값되도록 표현식으로 하였음
-//                (-security_sentence_To_Byte).toByte()
-//            else
-//                security_sentence_To_Byte
-
-
             var security_sentence_toBinaryString = Integer.toBinaryString(security_sentence_To_Byte) //바이트 해준것 2진수로 표현
-
-            println("temp = $security_sentence_To_Byte")
-
-            println("binary = $security_sentence_toBinaryString")
-
             var security_To_Int = Integer.valueOf(security_sentence_toBinaryString) //int 형으로 변환 해줌
 
             security_sentence_Binary = String.format("%08d", security_To_Int) //8자리가 안되면 8자리로 맞춰서 해줌
 
-            println("security_sentence_Binary = $security_sentence_Binary")
+
             make_decryption_IP()
-            println("IP index $i = ${IP[0]} ${IP[1]} ${IP[2]} ${IP[3]} ${IP[4]} ${IP[5]} ${IP[6]} ${IP[7]}")
             E_P_make()//처음 fk 했을때 E_P 확장 시켜주기
-            println("EP index $i = ${E_P[0]} ${E_P[1]} ${E_P[2]} ${E_P[3]} ${E_P[4]} ${E_P[5]} ${E_P[6]} ${E_P[7]}")
             exclusiveOR_EP_K2()
-            println("F_Fun $i = ${F_FUN[0]} ${F_FUN[1]} ${F_FUN[2]} ${F_FUN[3]} ${F_FUN[4]} ${F_FUN[5]} ${F_FUN[6]} ${F_FUN[7]}")
             S_Box_calculator()
             switchFun()
             E_P_make()//두번째 K1로 할때 확장
