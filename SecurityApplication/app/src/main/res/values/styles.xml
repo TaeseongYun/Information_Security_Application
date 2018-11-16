@@ -9,7 +9,7 @@
     </style>
 
     <style name="Splash" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:windowBackground">@drawable/security_splash</item>
+        <item name="android:windowBackground">@drawable/splash_icon</item>
     </style>
 
 </resources>
