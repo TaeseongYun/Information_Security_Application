@@ -1,6 +1,8 @@
 package com.tongmyung.yun.securityapplication
 
 import android.content.DialogInterface
+import android.graphics.Color
+import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
@@ -13,6 +15,7 @@ import android.widget.TextView
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import java.nio.charset.Charset
+import java.text.Normalizer
 
 /*지금 까지 입력한값 영어만 toByte()해주어서 P를 구했다
 
@@ -85,6 +88,8 @@ class MainActivity : AppCompatActivity() {
     var callTwice_decryption_IP_1 = false
     var decryptionTemp = 0
     var decryptionChar = 0
+    var make_TenSix_Bit = ""
+    var make_decryption_TenSix_Bit = ""
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -96,6 +101,10 @@ class MainActivity : AppCompatActivity() {
 
 
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { //상태바 색깔 변경 하는 것
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+            window.statusBarColor = Color.parseColor("#f2f2f2")
+        }
         button_security.setOnClickListener { v ->
             // 암호화 버튼 누르면 실행
             security_sentence = String()
@@ -104,7 +113,6 @@ class MainActivity : AppCompatActivity() {
             binaryChange()
 
             textView_security_sentence.text = security_sentence
-            println("textView_security_sentence = ${textView_security_sentence.text}")
 
         }
 
@@ -116,10 +124,11 @@ class MainActivity : AppCompatActivity() {
         }
         button_reset.setOnClickListener { v ->
             plainTextReset()
+            make_TenSix_Bit = "" //중복 방지
         }
     }
 
-    fun binaryChange() { //?? ??? ??? ??  ??
+    fun binaryChange() { //암호화 실행
         try {
             enable_plainText()
             subkey_Binary_make()
@@ -143,7 +152,6 @@ class MainActivity : AppCompatActivity() {
         var subkey_binary_temp = Integer.toBinaryString(subkey_integer)
         var subkey_binary_tempToint = Integer.valueOf(subkey_binary_temp)
         subkey_Binary = String.format("%010d", subkey_binary_tempToint)
-        println("subkey_Binary : $subkey_Binary")
     }
 
     fun K1_make() { //K1 만드는 함수
@@ -205,6 +213,7 @@ class MainActivity : AppCompatActivity() {
 
 
                 plainText_Binary = String.format("%08d", P_temp_To_Int) //8자리가 안되면 0으로 채움
+
                 make_IP() // IP만들어주는 함수
                 E_P_make()//함수 fk  E_P 만듦
                 exclusiveOR_EP_K1() //K1와 XOR
@@ -214,21 +223,61 @@ class MainActivity : AppCompatActivity() {
                 exclusiveOR_EP_K2() //K2 XOR
                 S_Box_calculator() //S-Box 사용
                 security_IP_1()
-            } else if (Integer.toBinaryString(plainText!![i].toInt()).length == 14) {
-                println("else if 14글자 문 들어옴")
+            } else if (Integer.toBinaryString(plainText!![i].toInt()).length == 14) { // 자음을 입력했을때 14이기 때문에 else if 걸어둠
                 ko = true
 
                 var BinaryString = Integer.toBinaryString(plainText!![i].toInt())
                 var binary = String.format("%16s", BinaryString)
-                println("binary = $binary")
 
 
                 binary_Change = binary.replace(" ", "0")
-                println("change = $binary_Change")
+
                 for (i in koArray1_Index.indices) {
                     koArray1[i] = binary_Change!![koArray1_Index[i]].toString()
                     koArray2[i] = binary_Change!![koArray2_Index[i]].toString()
                 }
+                make_IP() // IP만들어주는 함수
+                E_P_make()//함수 fk  E_P 만듦
+                exclusiveOR_EP_K1() //K1와 XOR
+                S_Box_calculator() //S-Box 사용
+                switchFun()//스위치
+                E_P_make()//K2 만드는것
+                exclusiveOR_EP_K2() //K2 XOR
+                S_Box_calculator() //S-Box 사용
+                security_IP_1()
+
+
+                make_IP() // IP만들어주는 함수
+                E_P_make()//함수 fk  E_P 만듦
+                exclusiveOR_EP_K1() //K1와 XOR
+                S_Box_calculator() //S-Box 사용
+                switchFun()//스위치
+                E_P_make()//K2 만드는것
+                exclusiveOR_EP_K2() //K2 XOR
+                S_Box_calculator() //S-Box 사용
+                security_IP_1()
+
+
+                koArrayTwice = false // 중복 방지
+                callTwice_IP_1 = false //중복 방지
+                make_TenSix_Bit = ""
+            } else { //한글 들어왔을때 else 문
+
+
+                ko = true
+
+                var BinaryString = Integer.toBinaryString(plainText!![i].toInt())
+                var binary = String.format("%16s", BinaryString)
+
+
+
+                binary_Change = binary.replace(" ", "0")
+
+                for (i in koArray1_Index.indices) {
+                    koArray1[i] = binary_Change!![koArray1_Index[i]].toString()
+                    koArray2[i] = binary_Change!![koArray2_Index[i]].toString()
+                }
+
                 make_IP() // IP만들어주는 함수
                 E_P_make()//함수 fk  E_P 만듦
                 exclusiveOR_EP_K1() //K1와 XOR
@@ -253,59 +302,8 @@ class MainActivity : AppCompatActivity() {
 
                 koArrayTwice = false // 중복 방지
                 callTwice_IP_1 = false //중복 방지
-            } else {
-                println("16글자 if 문 들어옴")
-
-                ko = true
-
-                var BinaryString = Integer.toBinaryString(plainText!![i].toInt())
-                var binary = String.format("%16s", BinaryString)
-                println("binary = $binary")
-
-
-                binary_Change = binary.replace(" ", "0")
-                println("change = $binary_Change")
-                for (i in koArray1_Index.indices) {
-                    koArray1[i] = binary_Change!![koArray1_Index[i]].toString()
-                    koArray2[i] = binary_Change!![koArray2_Index[i]].toString()
-                }
-
-                make_IP() // IP만들어주는 함수
-                E_P_make()//함수 fk  E_P 만듦
-                exclusiveOR_EP_K1() //K1와 XOR
-                S_Box_calculator() //S-Box 사용
-                switchFun()//스위치
-                E_P_make()//K2 만드는것
-                exclusiveOR_EP_K2() //K2 XOR
-                S_Box_calculator() //S-Box 사용
-                security_IP_1()
-
-
-
-                make_IP() // IP만들어주는 함수
-                E_P_make()//함수 fk  E_P 만듦
-                exclusiveOR_EP_K1() //K1와 XOR
-                S_Box_calculator() //S-Box 사용
-                switchFun()//스위치
-                E_P_make()//K2 만드는것
-                exclusiveOR_EP_K2() //K2 XOR
-                S_Box_calculator() //S-Box 사용
-                security_IP_1()
-
-                koArrayTwice = false // 중복 방지
-                callTwice_IP_1 = false //중복 방지
+                make_TenSix_Bit = "" //중복 방지
             }
-
-
-//            make_IP() // IP만들어주는 함수
-//            E_P_make()//함수 fk  E_P 만듦
-//            exclusiveOR_EP_K1() //K1와 XOR
-//            S_Box_calculator() //S-Box 사용
-//            switchFun()//스위치
-//            E_P_make()//K2 만드는것
-//            exclusiveOR_EP_K2() //K2 XOR
-//            S_Box_calculator() //S-Box 사용
-//            security_IP_1()
         }
     }
 
@@ -314,15 +312,12 @@ class MainActivity : AppCompatActivity() {
         if (ko) {
             for (i in IP.indices) {
                 IP[i] = koArray1[IP_Index[i] - 1]
-                println("처음 ip 값 $i = ${IP[i]}")
                 IP_list.add(IP[i])
             }
             if (koArrayTwice) {
                 IP_list.clear()
-                println("두번째 Ip 바꾸는것 들어옴")
                 for (i in IP.indices) {
                     IP[i] = koArray2[IP_Index[i] - 1]
-                    println("바뀐 ip 값 $i = ${IP[i]}")
                     IP_list.add(IP[i])
                 }
 
@@ -338,17 +333,36 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun subkey_check() {
-        var range = input_subkey.text
-        var range_Integer = Integer.parseInt(range.toString())
-        if (range_Integer > 1023 || range_Integer < 0) {
+        try {
+            var range = input_subkey.text
+            var range_Integer = Integer.parseInt(range.toString())
+            if (range_Integer > 1023 || range_Integer < 0) {
 //            키값 입력 잘못 됬을시 알림
+                var alertDialog = AlertDialog.Builder(this)
+                alertDialog.setTitle("키 값 재입력")
+                        .setMessage("키 값은 0~1023까지 입니다 \n 확인을 누르시면 초기화 됩니다.")
+                        .setIcon(R.drawable.danger_icon)
+                        .setPositiveButton("확인", { dialog: DialogInterface?, which: Int ->
+                            input_subkey.text.clear()
+                            input_normalKey.text.clear()
+                            input_subkey.isEnabled = true
+                            input_normalKey.isEnabled = true
+                        })
+                        .setNegativeButton("취소", { dialog: DialogInterface?, which: Int ->
+                            dialog?.dismiss()
+                        })
+                        .show()
+            }
+        }catch (e: Exception){
             var alertDialog = AlertDialog.Builder(this)
-            alertDialog.setTitle("키 값 재입력")
-                    .setMessage("키 값은 0~1023까지 입니다 \n 확인을 누르시면 초기화 됩니다.")
+            alertDialog.setTitle("공백불가")
+                    .setMessage("공백은 불가입니다. \n 확인을 누르시면 초기화 됩니다.")
                     .setIcon(R.drawable.danger_icon)
                     .setPositiveButton("확인", { dialog: DialogInterface?, which: Int ->
                         input_subkey.text.clear()
                         input_normalKey.text.clear()
+                        textView_security_sentence.text = "암호화문장"
+                        textView_decrytionText.text = "복호화문장"
                         input_subkey.isEnabled = true
                         input_normalKey.isEnabled = true
                     })
@@ -358,6 +372,7 @@ class MainActivity : AppCompatActivity() {
                     .show()
         }
     }
+
 
     //    사용못하게 막아두는 함수
     fun enable_plainText() {
@@ -410,10 +425,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun S_Box_calculator() { //SBox 계산 하는 함수 즉 F(R,SK)에서 확장시켜주고 SBox값 찾아가는것 까지 구현 완료
-        var s_Box_Zero_row = arrayOf(0, 0)
-        var s_Box_Zero_column = arrayOf(0, 0)
-        var s_Box_One_row = arrayOf(0, 0)
-        var s_Box_One_column = arrayOf(0, 0)
+        var s_Box_Zero_row = arrayOf(0, 0) //에스 박스0  행
+        var s_Box_Zero_column = arrayOf(0, 0) //에스박스 0 열
+        var s_Box_One_row = arrayOf(0, 0)//에스박스1 행
+        var s_Box_One_column = arrayOf(0, 0)//에스박스1 열
         for (i in s_Box_Zero_column.indices) {
             s_Box_Zero_row[i] = F_FUN[S_Box0_row[i] - 1]
             s_Box_Zero_column[i] = F_FUN[S_Box0_column[i] - 1]
@@ -514,8 +529,6 @@ class MainActivity : AppCompatActivity() {
 
     fun security_IP_1() {
         var IP_1_List = ArrayList<String>()
-
-
         if (ko) {
             for (i in IP_1_Index.indices) {
                 IP_1[i] = IP[IP_1_Index[i] - 1]
@@ -523,17 +536,20 @@ class MainActivity : AppCompatActivity() {
             }
 
             var str = (IP_1[0] + IP_1[1] + IP_1[2] + IP_1[3] + IP_1[4] + IP_1[5] + IP_1[6] + IP_1[7]).trim()
-            security_char = Integer.parseInt(str, 2)  //첫번째 매개변수 string 두번째 n진수
-            koTemp += security_char
 
 
-//            IP_1_List.clear()
+            make_TenSix_Bit += str
+
+            security_char = Integer.parseInt(make_TenSix_Bit, 2)//첫번째 매개변수 string 두번째 n진수
+
 
             if (callTwice_IP_1) {
-                println("callTwice_IP_1 불러짐")
+                koTemp += security_char
                 security_sentence += (koTemp.toChar().toString())
-                println("temp의 값 = $koTemp")
+
+
                 IP_1_Result.text = IP_1_List.toString()
+                koTemp = 0
             }
             callTwice_IP_1 = true
         } else {
@@ -553,31 +569,42 @@ class MainActivity : AppCompatActivity() {
 
     fun decrytion_IP_1() {
         var decryption_IP_1_List = ArrayList<String>()
-        if (ko) {
+        if (charOver_TWOFIVESIX) {
             for (i in IP_1_Index.indices) {
                 IP_1[i] = IP[IP_1_Index[i] - 1]
                 decryption_IP_1_List.add(IP_1[i])
             }
 
             var str = (IP_1[0] + IP_1[1] + IP_1[2] + IP_1[3] + IP_1[4] + IP_1[5] + IP_1[6] + IP_1[7]).trim()
-            decryptionChar = Integer.parseInt(str, 2)  //첫번째 매개변수 string 두번째 n진수
-            decryptionTemp += decryptionChar
+            make_decryption_TenSix_Bit += str
 
-            if (callTwice_decryption_IP_1){
+
+            decryptionChar = Integer.parseInt(make_decryption_TenSix_Bit, 2)  //첫번째 매개변수 string 두번째 n진수
+
+
+            if (callTwice_decryption_IP_1) {
+                decryptionTemp += decryptionChar
+
+
                 recovery_Sentence += (decryptionTemp.toChar().toString())
+                Decription_IP_1_Result.text = decryption_IP_1_List.toString()
+                decryptionTemp = 0
             }
+            callTwice_decryption_IP_1 = true
 
         } else {
+
             for (i in IP_1_Index.indices) {
                 IP_1[i] = IP[IP_1_Index[i] - 1]
                 decryption_IP_1_List.add(IP_1[i])
             }
 
             var str = (IP_1[0] + IP_1[1] + IP_1[2] + IP_1[3] + IP_1[4] + IP_1[5] + IP_1[6] + IP_1[7]).trim()
+
             var security_char = Integer.parseInt(str, 2)  //첫번째 매개변수 string 두번째 n진수
 
-            Decription_IP_1_Result.text = decryption_IP_1_List.toString()
             recovery_Sentence += (security_char.toChar().toString())
+            Decription_IP_1_Result.text = decryption_IP_1_List.toString()
         }
 
     }
@@ -586,12 +613,10 @@ class MainActivity : AppCompatActivity() {
         var decryptionIP_List = ArrayList<String>()
         if (charOver_TWOFIVESIX) {
             for (i in IP.indices) {
-                println("바뀌어지기 전에 IP 값")
                 IP[i] = decrytionkoArray1[IP_Index[i] - 1]
                 decryptionIP_List.add(IP[i])
             }
             if (decrytionTwice) {
-                println("바뀌고 난 후 IP 값")
                 decryptionIP_List.clear()
                 for (i in IP.indices) {
                     IP[i] = decrytionkoArray2[IP_Index[i] - 1]
@@ -600,6 +625,7 @@ class MainActivity : AppCompatActivity() {
                 Decription_IP_Result.text = decryptionIP_List.toString()
             }
             Decription_IP_Result.text = decryptionIP_List.toString()
+            decrytionTwice = true
         } else {
             for (i in IP.indices) {
                 IP[i] = security_sentence_Binary!![IP_Index[i] - 1].toString()
@@ -610,78 +636,125 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun decryption() { //이부분 부터 다시 하면 될듯 toInt()의 값이 256만 넘어 가면 끝남
-        for (i in security_sentence?.indices!!) {
-            println("security_sentence = ${security_sentence!![i].toInt()}")
-            if (security_sentence!![i].toInt() < 256) {
-                println("복호화 if(256보다 작은것) 문")
-                charOver_TWOFIVESIX = false
-                var security_sentence_To_Byte = security_sentence!![i]?.toInt() // ???? ????? ???? ??
-                var security_sentence_toBinaryString = Integer.toBinaryString(security_sentence_To_Byte) //??? ??? 2??? ??
-                var security_To_Int = Integer.valueOf(security_sentence_toBinaryString) //int ??? ?? ??
+    fun decryption() { //복호화
+        try {
+            for (i in plainText?.indices!!) {
+                if (security_sentence!![i].toInt() < 256) {
+                    var security_sentence_To_Byte = security_sentence!![i].toInt() // 문장 인트형으로 바꿈
+                    var security_sentence_toBinaryString = Integer.toBinaryString(security_sentence_To_Byte) //2진수 표현
+                    var security_To_Int = Integer.valueOf(security_sentence_toBinaryString) //2진수 표현을 다시 인트형
 
-                security_sentence_Binary = String.format("%08d", security_To_Int) //8??? ??? 8??? ??? ??
+                    security_sentence_Binary = String.format("%08d", security_To_Int) //8자리 아니면 8자리로 맞춤
 
-                make_decryption_IP()
-                E_P_make()//?? fk ??? E_P ?? ????
-                exclusiveOR_EP_K2()
-                S_Box_calculator()
-                switchFun()
-                E_P_make()//??? K1? ?? ??
-                exclusiveOR_EP_K1()
-                S_Box_calculator()
-                decrytion_IP_1()
-            } else {
-                println("복호화 else문(256 보다 큰것)")
+                    make_decryption_IP()
+                    E_P_make()//?? fk ??? E_P ?? ????
+                    exclusiveOR_EP_K2()
+                    S_Box_calculator()
+                    switchFun()
+                    E_P_make()//??? K1? ?? ??
+                    exclusiveOR_EP_K1()
+                    S_Box_calculator()
+                    decrytion_IP_1()
 
-                charOver_TWOFIVESIX = true
-                var BinaryString = Integer.toBinaryString(plainText!![i].toInt())
-                var binary = String.format("%16s", BinaryString)
-                println("binary = $binary")
+                } else if (Integer.toBinaryString(security_sentence!![i].toInt()).length == 14) {
+
+                    charOver_TWOFIVESIX = true
+                    var BinaryString = Integer.toBinaryString(textView_security_sentence.text!![i].toInt())
+                    var binary = String.format("%16s", BinaryString)
 
 
-                security_binary_Change = binary.replace(" ", "0")
-                println("change = ${security_binary_Change}")
-                for (i in koArray1_Index.indices) {
-                    decrytionkoArray1[i] = security_binary_Change!![decrytionkoArray1_Index[i]].toString()
-                    decrytionkoArray2[i] = security_binary_Change!![decrytionkoArray2_Index[i]].toString()
+
+                    security_binary_Change = binary.replace(" ", "0")
+
+                    for (i in koArray1_Index.indices) {
+                        decrytionkoArray1[i] = security_binary_Change!![decrytionkoArray1_Index[i]].toString()
+                        decrytionkoArray2[i] = security_binary_Change!![decrytionkoArray2_Index[i]].toString()
+                    }
+                    make_decryption_IP()
+                    E_P_make()//?? fk ??? E_P ?? ????
+                    exclusiveOR_EP_K2()
+                    S_Box_calculator()
+                    switchFun()
+                    E_P_make()//??? K1? ?? ??
+                    exclusiveOR_EP_K1()
+                    S_Box_calculator()
+                    decrytion_IP_1()
+
+
+
+                    make_decryption_IP()
+                    E_P_make()//?? fk ??? E_P ?? ????
+                    exclusiveOR_EP_K2()
+                    S_Box_calculator()
+                    switchFun()
+                    E_P_make()//??? K1? ?? ??
+                    exclusiveOR_EP_K1()
+                    S_Box_calculator()
+                    decrytion_IP_1()
+
+                    decrytionTwice = false //중복 방지
+                    charOver_TWOFIVESIX = false //중복 방지
+                    callTwice_decryption_IP_1 = false //중복방지
+                    make_decryption_TenSix_Bit = ""
+                } else {
+                    charOver_TWOFIVESIX = true
+                    var BinaryString = Integer.toBinaryString(textView_security_sentence.text!![i].toInt())
+                    var binary = String.format("%16s", BinaryString)
+
+
+
+                    security_binary_Change = binary.replace(" ", "0")
+
+                    for (i in koArray1_Index.indices) {
+                        decrytionkoArray1[i] = security_binary_Change!![decrytionkoArray1_Index[i]].toString()
+                        decrytionkoArray2[i] = security_binary_Change!![decrytionkoArray2_Index[i]].toString()
+                    }
+
+                    make_decryption_IP()
+                    E_P_make()//?? fk ??? E_P ?? ????
+                    exclusiveOR_EP_K2()
+                    S_Box_calculator()
+                    switchFun()
+                    E_P_make()//??? K1? ?? ??
+                    exclusiveOR_EP_K1()
+                    S_Box_calculator()
+                    decrytion_IP_1()
+
+
+
+                    make_decryption_IP()
+                    E_P_make()//?? fk ??? E_P ?? ????
+                    exclusiveOR_EP_K2()
+                    S_Box_calculator()
+                    switchFun()
+                    E_P_make()//??? K1? ?? ??
+                    exclusiveOR_EP_K1()
+                    S_Box_calculator()
+                    decrytion_IP_1()
+
+                    decrytionTwice = false //중복 방지
+                    charOver_TWOFIVESIX = false //중복 방지
+                    callTwice_decryption_IP_1 = false // 중복방지
+                    make_decryption_TenSix_Bit = ""
                 }
-                make_decryption_IP()
-                E_P_make()//?? fk ??? E_P ?? ????
-                exclusiveOR_EP_K2()
-                S_Box_calculator()
-                switchFun()
-                E_P_make()//??? K1? ?? ??
-                exclusiveOR_EP_K1()
-                S_Box_calculator()
-                decrytion_IP_1()
-
-
-
-                make_decryption_IP()
-                E_P_make()//?? fk ??? E_P ?? ????
-                exclusiveOR_EP_K2()
-                S_Box_calculator()
-                switchFun()
-                E_P_make()//??? K1? ?? ??
-                exclusiveOR_EP_K1()
-                S_Box_calculator()
-                decrytion_IP_1()
-
-                decrytionTwice = false //중복 방지
-
             }
-
-
-//            make_decryption_IP()
-//            E_P_make()//?? fk ??? E_P ?? ????
-//            exclusiveOR_EP_K2()
-//            S_Box_calculator()
-//            switchFun()
-//            E_P_make()//??? K1? ?? ??
-//            exclusiveOR_EP_K1()
-//            S_Box_calculator()
-//            decrytion_IP_1()
+        }catch (e: Exception){
+            var alertDialog = AlertDialog.Builder(this)
+            alertDialog.setTitle("공백불가")
+                    .setMessage("공백은 불가입니다. \n 확인을 누르시면 초기화 됩니다.")
+                    .setIcon(R.drawable.danger_icon)
+                    .setPositiveButton("확인", { dialog: DialogInterface?, which: Int ->
+                        input_subkey.text.clear()
+                        input_normalKey.text.clear()
+                        textView_security_sentence.text = "암호화문장"
+                        textView_decrytionText.text = "복호화문장"
+                        input_subkey.isEnabled = true
+                        input_normalKey.isEnabled = true
+                    })
+                    .setNegativeButton("취소", { dialog: DialogInterface?, which: Int ->
+                        dialog?.dismiss()
+                    })
+                    .show()
         }
 
     }

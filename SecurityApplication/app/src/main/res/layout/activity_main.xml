@@ -35,11 +35,9 @@
         android:id="@+id/input_normalKey"
         android:layout_width="150dp"
         android:layout_height="39dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:inputType="textPersonName" />
 
     <TextView
@@ -50,7 +48,7 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:text="키 입력(0~1023)"
         android:textColor="@android:color/black"/>
 
@@ -62,7 +60,7 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="8dp"
         android:ems="10"
         android:inputType="textPersonName"/>
     <LinearLayout
