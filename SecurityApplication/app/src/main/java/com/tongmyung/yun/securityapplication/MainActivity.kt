@@ -3,19 +3,12 @@ package com.tongmyung.yun.securityapplication
 import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Build
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.view.LayoutInflater
+import android.support.v7.app.AppCompatActivity
 import android.view.View
-import android.view.ViewGroup
-import android.widget.TextView
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
-import java.nio.charset.Charset
-import java.text.Normalizer
 
 /*지금 까지 입력한값 영어만 toByte()해주어서 P를 구했다
 
@@ -50,27 +43,27 @@ class MainActivity : AppCompatActivity() {
     val switch_FromLeftToRight = arrayOf(5, 6, 7, 8) //왼쪽것을 오른쪽으로 옮기는 변수
     val switch_FromRightToLeft = arrayOf(1, 2, 3, 4) //오른쪽것을 왼쪽으로 옮기는 변수
     var P10 = arrayOf("0", "0", "0", "0", "0", "0", "0", "0", "0", "0") //P10 값 초기화
-    var subkey_Binary: String? = null // Interger.toBinaryString 해주기위해 만들어줌
-    var plainText: String? = null //평서문을 넣어주는곳
-    var plainText_Binary: String? = null // 입력한 평서문 값을 toByte() 한 결과값을 여기다가 넣어줌 즉 P값
+    lateinit var subkey_Binary: String // Interger.toBinaryString 해주기위해 만들어줌
+    lateinit var plainText: String //평서문을 넣어주는곳
+    lateinit var plainText_Binary: String // 입력한 평서문 값을 toByte() 한 결과값을 여기다가 넣어줌 즉 P값
     var IP = arrayOf("0", "0", "0", "0", "0", "0", "0", "0")//IP(초기 순열함수)값을  초기화 P를 토대로 다시 초기화 시켜줌
     var IP_1 = arrayOf("0", "0", "0", "0", "0", "0", "0", "0")//IP-1(최종 순열함수)값을 초기화 P를 토대로 다시 초기화
     var E_P = arrayOf("0", "0", "0", "0", "0", "0", "0", "0")
     var K1 = arrayOf("0", "0", "0", "0", "0", "0", "0", "0") //K1 초기화
     var K2 = arrayOf("0", "0", "0", "0", "0", "0", "0", "0") //K2 초기화
-    var security_sentence: String? = null //암호화 시킨 문장
-    var recovery_Sentence: String? = null //복호화 시킨 문장
-    var hashMap: HashMapadd? = null
-    var security_sentence_Binary: String? = null
-    var binarySBoxZeroResult: String? = null
-    var binarySBoxOneResult: String? = null
+    lateinit var security_sentence: String //암호화 시킨 문장
+    lateinit var recovery_Sentence: String //복호화 시킨 문장
+    lateinit var hashMap: HashMapadd
+    lateinit var security_sentence_Binary: String
+    lateinit var binarySBoxZeroResult: String
+    lateinit var binarySBoxOneResult: String
     var SBoxResult = arrayOf("0", "0", "0", "0") //P4 결과값을 넣어주는곳
     var SBoxResultTemp = arrayOf("0", "0", "0", "0") //P4결과값을 임시로 넣어주는곳
     val SBoxIndex = arrayOf(2, 3)
     var fkResultLeft = arrayOf("0", "0", "0", "0")
-    var binary_Change: String? = null //한글이면 16비트로 바꾸어 주는것
+    lateinit var binary_Change: String //한글이면 16비트로 바꾸어 주는것
     var ko: Boolean = false
-    var security_binary_Change: String? = null
+    lateinit var security_binary_Change: String
     var charOver_TWOFIVESIX: Boolean = false
     var koArray1 = arrayOf("0", "0", "0", "0", "0", "0", "0", "0")
     var koArray2 = arrayOf("0", "0", "0", "0", "0", "0", "0", "0")
@@ -95,8 +88,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         hashMap = HashMapadd()
-        hashMap?.S0_map_add()
-        hashMap?.S1_map_add()
+        hashMap.S0_map_add()
+        hashMap.S1_map_add()
 
 
 
@@ -166,7 +159,7 @@ class MainActivity : AppCompatActivity() {
 
     fun P10_make() { //P10 만들어줌
         for (i in P10.indices)
-            P10[i] = subkey_Binary!![P10_Index[i] - 1].toString()
+            P10[i] = subkey_Binary[P10_Index[i] - 1].toString()
     }
 
     fun shift_calculate() { //옆으로 비트 옮겨줌
@@ -204,10 +197,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun make_P() { //안에 IP와 EP만드는것 있음
-        for (i in plainText?.indices!!) {
-            if (plainText!![i].toInt() < 256) {
+        for (i in plainText.indices) {
+            if (plainText[i].toInt() < 256) {
                 ko = false
-                var P_integer = plainText!![i].toByte() //Byte 형으로 변환
+                var P_integer = plainText[i].toByte() //Byte 형으로 변환
                 var P_temp = Integer.toBinaryString(P_integer.toInt()) //toBinaryString 으로 형변환
                 var P_temp_To_Int = Integer.valueOf(P_temp)
 
@@ -223,18 +216,18 @@ class MainActivity : AppCompatActivity() {
                 exclusiveOR_EP_K2() //K2 XOR
                 S_Box_calculator() //S-Box 사용
                 security_IP_1()
-            } else if (Integer.toBinaryString(plainText!![i].toInt()).length == 14) { // 자음을 입력했을때 14이기 때문에 else if 걸어둠
+            } else if (Integer.toBinaryString(plainText[i].toInt()).length == 14) { // 자음을 입력했을때 14이기 때문에 else if 걸어둠
                 ko = true
 
-                var BinaryString = Integer.toBinaryString(plainText!![i].toInt())
+                var BinaryString = Integer.toBinaryString(plainText[i].toInt())
                 var binary = String.format("%16s", BinaryString)
 
 
                 binary_Change = binary.replace(" ", "0")
 
                 for (i in koArray1_Index.indices) {
-                    koArray1[i] = binary_Change!![koArray1_Index[i]].toString()
-                    koArray2[i] = binary_Change!![koArray2_Index[i]].toString()
+                    koArray1[i] = binary_Change[koArray1_Index[i]].toString()
+                    koArray2[i] = binary_Change[koArray2_Index[i]].toString()
                 }
                 make_IP() // IP만들어주는 함수
                 E_P_make()//함수 fk  E_P 만듦
@@ -325,7 +318,7 @@ class MainActivity : AppCompatActivity() {
             koArrayTwice = true
         } else {
             for (i in IP.indices) {
-                IP[i] = plainText_Binary!![IP_Index[i] - 1].toString()
+                IP[i] = plainText_Binary[IP_Index[i] - 1].toString()
                 IP_list.add(IP[i])
             }
         }
@@ -628,7 +621,7 @@ class MainActivity : AppCompatActivity() {
             decrytionTwice = true
         } else {
             for (i in IP.indices) {
-                IP[i] = security_sentence_Binary!![IP_Index[i] - 1].toString()
+                IP[i] = security_sentence_Binary[IP_Index[i] - 1].toString()
                 decryptionIP_List.add(IP[i])
             }
             Decription_IP_Result.text = decryptionIP_List.toString()
@@ -638,9 +631,9 @@ class MainActivity : AppCompatActivity() {
 
     fun decryption() { //복호화
         try {
-            for (i in plainText?.indices!!) {
-                if (security_sentence!![i].toInt() < 256) {
-                    var security_sentence_To_Byte = security_sentence!![i].toInt() // 문장 인트형으로 바꿈
+            for (i in plainText.indices) {
+                if (security_sentence[i].toInt() < 256) {
+                    var security_sentence_To_Byte = security_sentence[i].toInt() // 문장 인트형으로 바꿈
                     var security_sentence_toBinaryString = Integer.toBinaryString(security_sentence_To_Byte) //2진수 표현
                     var security_To_Int = Integer.valueOf(security_sentence_toBinaryString) //2진수 표현을 다시 인트형
 
@@ -656,10 +649,10 @@ class MainActivity : AppCompatActivity() {
                     S_Box_calculator()
                     decrytion_IP_1()
 
-                } else if (Integer.toBinaryString(security_sentence!![i].toInt()).length == 14) {
+                } else if (Integer.toBinaryString(security_sentence[i].toInt()).length == 14) {
 
                     charOver_TWOFIVESIX = true
-                    var BinaryString = Integer.toBinaryString(textView_security_sentence.text!![i].toInt())
+                    var BinaryString = Integer.toBinaryString(textView_security_sentence.text[i].toInt())
                     var binary = String.format("%16s", BinaryString)
 
 
@@ -667,8 +660,8 @@ class MainActivity : AppCompatActivity() {
                     security_binary_Change = binary.replace(" ", "0")
 
                     for (i in koArray1_Index.indices) {
-                        decrytionkoArray1[i] = security_binary_Change!![decrytionkoArray1_Index[i]].toString()
-                        decrytionkoArray2[i] = security_binary_Change!![decrytionkoArray2_Index[i]].toString()
+                        decrytionkoArray1[i] = security_binary_Change[decrytionkoArray1_Index[i]].toString()
+                        decrytionkoArray2[i] = security_binary_Change[decrytionkoArray2_Index[i]].toString()
                     }
                     make_decryption_IP()
                     E_P_make()//?? fk ??? E_P ?? ????
@@ -706,8 +699,8 @@ class MainActivity : AppCompatActivity() {
                     security_binary_Change = binary.replace(" ", "0")
 
                     for (i in koArray1_Index.indices) {
-                        decrytionkoArray1[i] = security_binary_Change!![decrytionkoArray1_Index[i]].toString()
-                        decrytionkoArray2[i] = security_binary_Change!![decrytionkoArray2_Index[i]].toString()
+                        decrytionkoArray1[i] = security_binary_Change[decrytionkoArray1_Index[i]].toString()
+                        decrytionkoArray2[i] = security_binary_Change[decrytionkoArray2_Index[i]].toString()
                     }
 
                     make_decryption_IP()
