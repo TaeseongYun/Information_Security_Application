@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
+import com.tongmyung.yun.securityapplication.clear
 
 /*지금 까지 입력한값 영어만 toByte()해주어서 P를 구했다
 
@@ -267,8 +268,8 @@ class MainActivity : AppCompatActivity() {
                 binary_Change = binary.replace(" ", "0")
 
                 for (i in koArray1_Index.indices) {
-                    koArray1[i] = binary_Change!![koArray1_Index[i]].toString()
-                    koArray2[i] = binary_Change!![koArray2_Index[i]].toString()
+                    koArray1[i] = binary_Change[koArray1_Index[i]].toString()
+                    koArray2[i] = binary_Change[koArray2_Index[i]].toString()
                 }
 
                 make_IP() // IP만들어주는 함수
@@ -326,43 +327,54 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun subkey_check() {
+        fun reset_input_subkey_Button() =
+                with(input_subkey) {
+                    text.clear()
+                    isEnabled = true
+                }
+
+        fun reset_input_normal_key_Button() =
+                with(input_normalKey) {
+                    text.clear()
+                    isEnabled = true
+                }
         try {
             var range = input_subkey.text
             var range_Integer = Integer.parseInt(range.toString())
+
             if (range_Integer > 1023 || range_Integer < 0) {
 //            키값 입력 잘못 됬을시 알림
                 var alertDialog = AlertDialog.Builder(this)
-                alertDialog.setTitle("키 값 재입력")
-                        .setMessage("키 값은 0~1023까지 입니다 \n 확인을 누르시면 초기화 됩니다.")
-                        .setIcon(R.drawable.danger_icon)
-                        .setPositiveButton("확인", { dialog: DialogInterface?, which: Int ->
-                            input_subkey.text.clear()
-                            input_normalKey.text.clear()
-                            input_subkey.isEnabled = true
-                            input_normalKey.isEnabled = true
-                        })
-                        .setNegativeButton("취소", { dialog: DialogInterface?, which: Int ->
-                            dialog?.dismiss()
-                        })
-                        .show()
+                with(alertDialog) {
+                    setTitle("키 값 재입력")
+                    setIcon(R.drawable.danger_icon)
+                    setPositiveButton("확인") {   dialog, which ->
+                        reset_input_subkey_Button()
+                        reset_input_normal_key_Button()
+                    }
+                    setNegativeButton("취소") { dialog, which ->
+                        dialog.dismiss()
+                    }
+                    show()
+                }
             }
         }catch (e: Exception){
             var alertDialog = AlertDialog.Builder(this)
-            alertDialog.setTitle("공백불가")
-                    .setMessage("공백은 불가입니다. \n 확인을 누르시면 초기화 됩니다.")
-                    .setIcon(R.drawable.danger_icon)
-                    .setPositiveButton("확인", { dialog: DialogInterface?, which: Int ->
-                        input_subkey.text.clear()
-                        input_normalKey.text.clear()
-                        textView_security_sentence.text = "암호화문장"
-                        textView_decrytionText.text = "복호화문장"
-                        input_subkey.isEnabled = true
-                        input_normalKey.isEnabled = true
-                    })
-                    .setNegativeButton("취소", { dialog: DialogInterface?, which: Int ->
-                        dialog?.dismiss()
-                    })
-                    .show()
+            with(alertDialog) {
+                setMessage("공백불가")
+                setIcon(R.drawable.danger_icon)
+                setPositiveButton("확인") {
+                    dialog, which ->
+                    reset_input_subkey_Button()
+                    reset_input_normal_key_Button()
+                    textView_security_sentence.clear("암호화문장") //확장함수 만든것
+                    textView_decrytionText.clear("복호화문장") //확장함수
+                }
+                setNegativeButton("취소") {
+                    dialog, which -> dialog.dismiss()
+                }
+                show()
+            }
         }
     }
 
