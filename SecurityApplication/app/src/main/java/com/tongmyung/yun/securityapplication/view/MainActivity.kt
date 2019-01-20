@@ -30,17 +30,17 @@ import com.tongmyung.yun.securityapplication.expansion.clear
 
 //복호화 완료 그런데 한글 안됨
 class MainActivity : AppCompatActivity() {
-    val P10_Index = arrayOf(3, 5, 2, 7, 4, 10, 1, 9, 8, 6)
-    val P8_Index = arrayOf(6, 3, 7, 4, 8, 5, 10, 9)
-    val IP_Index = arrayOf(2, 6, 3, 1, 4, 8, 5, 7)
-    val EP_Index = arrayOf(7, 4, 5, 6, 5, 6, 7, 4)
-    val IP_1_Index = arrayOf(4, 1, 3, 5, 7, 2, 8, 6)
+    private val P10_Index = arrayOf(3, 5, 2, 7, 4, 10, 1, 9, 8, 6)
+    private val P8_Index = arrayOf(6, 3, 7, 4, 8, 5, 10, 9)
+    private val IP_Index = arrayOf(2, 6, 3, 1, 4, 8, 5, 7)
+    private val EP_Index = arrayOf(7, 4, 5, 6, 5, 6, 7, 4)
+    private val IP_1_Index = arrayOf(4, 1, 3, 5, 7, 2, 8, 6)
     var F_FUN = arrayOf(0, 0, 0, 0, 0, 0, 0, 0)
-    val S_Box0_row = arrayOf(1, 4) //S_BOX0 가로  상단 인덱스
-    val S_Box0_column = arrayOf(2, 3) //S_BOX0 세로 좌측 인덱스
-    val S_Box1_row = arrayOf(5, 8) //S_Box1 가로 상단 인덱스
-    val S_Box1_column = arrayOf(6, 7) //S_BOX1 세로 좌측 인덱스
-    val LEFT = arrayOf(1, 2, 3, 4)
+    private val S_Box0_row = arrayOf(1, 4) //S_BOX0 가로  상단 인덱스
+    private val S_Box0_column = arrayOf(2, 3) //S_BOX0 세로 좌측 인덱스
+    private val S_Box1_row = arrayOf(5, 8) //S_Box1 가로 상단 인덱스
+    private val S_Box1_column = arrayOf(6, 7) //S_BOX1 세로 좌측 인덱스
+    private val LEFT = arrayOf(1, 2, 3, 4)
     val P4 = arrayOf(2, 4, 3, 1)
     val switch_FromLeftToRight = arrayOf(5, 6, 7, 8) //왼쪽것을 오른쪽으로 옮기는 변수
     val switch_FromRightToLeft = arrayOf(1, 2, 3, 4) //오른쪽것을 왼쪽으로 옮기는 변수

@@ -4,15 +4,17 @@ class HashMapadd{
 
     var S0_map = HashMap<Int, List<Int>>()
     var S1_map = HashMap<Int, List<Int>>()
-    val first_list_S0 = arrayOf(1,0,3,2)
-    val second_list_S0 = arrayOf(3,2,1,0)
-    val third_list_S0 = arrayOf(0,2,1,3)
-    val firth_list_S0 = arrayOf(3,1,3,2)
 
-    val first_list_S1 = arrayOf(0,1,2,3)
-    val second_list_S1 = arrayOf(2,0,1,3)
-    val third_list_S1 = arrayOf(3,0,1,0)
-    val firth_list_S1 = arrayOf(2,1,0,3)
+    private val first_list_S0 = arrayOf(1,0,3,2)
+    private val second_list_S0 = arrayOf(3,2,1,0)
+    private val third_list_S0 = arrayOf(0,2,1,3)
+    private val firth_list_S0 = arrayOf(3,1,3,2)
+
+    private val first_list_S1 = arrayOf(0,1,2,3)
+    private  val second_list_S1 = arrayOf(2,0,1,3)
+    private val third_list_S1 = arrayOf(3,0,1,0)
+    private  val firth_list_S1 = arrayOf(2,1,0,3)
+
 
     init {
         S0_map_add()
