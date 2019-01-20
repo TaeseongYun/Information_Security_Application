@@ -1,8 +1,9 @@
-package com.tongmyung.yun.securityapplication
+package com.tongmyung.yun.securityapplication.UI
 
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import com.tongmyung.yun.securityapplication.view.MainActivity
 
 class Splash : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {

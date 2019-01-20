@@ -1,6 +1,5 @@
-package com.tongmyung.yun.securityapplication
+package com.tongmyung.yun.securityapplication.view
 
-import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -8,8 +7,10 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.Toast
+import com.tongmyung.yun.securityapplication.model.HashMapadd
+import com.tongmyung.yun.securityapplication.R
 import kotlinx.android.synthetic.main.activity_main.*
-import com.tongmyung.yun.securityapplication.clear
+import com.tongmyung.yun.securityapplication.expansion.clear
 
 /*지금 까지 입력한값 영어만 toByte()해주어서 P를 구했다
 
@@ -359,21 +360,19 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }catch (e: Exception){
-            var alertDialog = AlertDialog.Builder(this)
-            with(alertDialog) {
+            AlertDialog.Builder(this)?.let { with(it) {
                 setMessage("공백불가")
                 setIcon(R.drawable.danger_icon)
                 setPositiveButton("확인") {
-                    dialog, which ->
-                    reset_input_subkey_Button()
+                    dialog, which -> reset_input_subkey_Button()
                     reset_input_normal_key_Button()
-                    textView_security_sentence.clear("암호화문장") //확장함수 만든것
-                    textView_decrytionText.clear("복호화문장") //확장함수
+                    textView_security_sentence.clear("암호화문장")
+                    textView_decrytionText.clear("복호화 문장")
                 }
                 setNegativeButton("취소") {
                     dialog, which -> dialog.dismiss()
                 }
-                show()
+                show() }
             }
         }
     }
@@ -744,22 +743,27 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }catch (e: Exception){
-            var alertDialog = AlertDialog.Builder(this)
-            alertDialog.setTitle("공백불가")
-                    .setMessage("공백은 불가입니다. \n 확인을 누르시면 초기화 됩니다.")
-                    .setIcon(R.drawable.danger_icon)
-                    .setPositiveButton("확인", { dialog: DialogInterface?, which: Int ->
+            AlertDialog.Builder(this)?.let { with(it) {
+                setTitle("공백불가")
+                setMessage("""공백은 불가입니다.
+                    |확인을 누르시면 초기화 됩니다.
+                """.trimMargin())
+                setIcon(R.drawable.danger_icon)
+                setNegativeButton("취소") {
+                        dialog, which -> dialog.dismiss()
+                    }
+                setPositiveButton("확인") {
+                    dialog, which ->
                         input_subkey.text.clear()
                         input_normalKey.text.clear()
                         textView_security_sentence.text = "암호화문장"
                         textView_decrytionText.text = "복호화문장"
                         input_subkey.isEnabled = true
                         input_normalKey.isEnabled = true
-                    })
-                    .setNegativeButton("취소", { dialog: DialogInterface?, which: Int ->
-                        dialog?.dismiss()
-                    })
-                    .show()
+                    }
+                show()
+                }
+            }
         }
 
     }

@@ -1,4 +1,4 @@
-package com.tongmyung.yun.securityapplication
+package com.tongmyung.yun.securityapplication.model
 
 class HashMapadd{
 
