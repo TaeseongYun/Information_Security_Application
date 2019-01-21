@@ -9,7 +9,7 @@
         android:roundIcon="@drawable/security_icon"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".UI.Splash"
+        <activity android:name=".ui.Splash"
             android:theme="@style/Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

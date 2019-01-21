@@ -1,4 +1,4 @@
-package com.tongmyung.yun.securityapplication.UI
+package com.tongmyung.yun.securityapplication.ui
 
 import android.app.Activity
 import android.content.Intent
