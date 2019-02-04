@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Security Application</string>
+    <string name="input_normal">평문입력</string>
+    <string name="input_key">키 입력(0~1023)</string>
+
+    <!--Button Name-->
+    <string name="security_button">암호화</string>
+    <string name="decryption_button">복호화</string>
+    <string name="reset_button">초기화</string>
 </resources>
